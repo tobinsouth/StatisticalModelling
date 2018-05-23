@@ -1,0 +1,46 @@
+---
+title: "Group Project"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+
+knitr::opts_chunk$set(echo = TRUE)
+mammo <- read.csv("mammo.txt", header = TRUE)
+attach(mammo)
+```
+
+
+## Introduction (description of data and purpose of the analysis). (5 marks)
+## Data entry and data cleaning. (5 marks)
+
+```{r}
+#You can see that everything but severity (which should probablt be a factor) is being read in as a factor due to the ? character. Need to set these to NA then change the appropriate variables to numeric
+head(mammo)
+summary(mammo)
+```
+
+```{r}
+#Set all the '?' to NA. There are a lot of NAs!
+idx <- mammo == "?"
+is.na(mammo) <- idx
+summary(mammo)
+```
+
+```{r}
+mammo$Age <- as.numeric(Age)
+mammo$Shape <- factor(Shape, levels = c(1, 2, 3, 4))
+mammo$Margin <- factor(Margin, levels = c(1, 2, 3, 4, 5))
+mammo$Density <- factor(Density, levels = c(1, 2, 3, 4))
+mammo$Severity <- factor(Severity, levels = c(0, 1))
+
+summary(mammo)
+```
+
+
+## Data visualisation and data summaries. (10 marks)
+## Model fitting and model selection. (5 marks)
+## Justification for choice of final model. (5 marks)
+## Interpretation of parameters from final model. (5 marks)
+##Predicting probabilities and interpretation. (10 marks)
