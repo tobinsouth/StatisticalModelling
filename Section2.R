@@ -1,4 +1,4 @@
-## Here we do stuff
-data <- 1
+## Import Data set----
 
-#lily was here
+mammo <- read.csv('mammo.txt', header = TRUE)
+head(mammo)
