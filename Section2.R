@@ -73,18 +73,18 @@ ggplot(data = mammo, aes(y= Age, x=BI.RADS )) + geom_point()
 
 #Model fitting and model selection. (5 marks) (Lily)----
 
-complete= 
-
-complete=mammo[!is.na(mammo$Age),] # Use complete data for models
+complete=!is.na(mammo$Age)&!is.na(mammo$Shape)&!is.na(mammo$Margin)&!is.na(mammo$Density) # Use complete data for models
 
 mod.full <- glm(formula = Severity ~ Age + Shape + Margin + Density,
-               family = binomial(link = logit),
-               data = mammo) #Defining full model
+               family = binomial,
+               data = mammo[complete,]) #Defining full model
 summary(mod.full)
 
-s2 <- sum((mod.full$residuals)^2)/mod.full$df
+s2 <- sum((mod.full$residuals)^2)/mod.full$df.residual
+s2
 
-mod.step <- step(mod.full)
+mod.step <- step(mod.full, scale = s2) # woohoo it works
+summary(mod.step)
 
 #Justification for choice of final model. (5 marks) (Lily)----
 
@@ -98,4 +98,4 @@ pred.CV <- data.frame(YoungestHouseholdMember=seq(min(DogPark$YoungestHouseholdM
 pred.CV$CurrentlyVisit.hat <- predict(mod.fit,newdata=pred.CV)
 
 
-C#ool
+#Cool
