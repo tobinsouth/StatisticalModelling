@@ -1,11 +1,13 @@
+# Libraries----
+
 library(ggplot2)
 install.packages("GGally") # Not needed but it looks cool as shit
 library(GGally)
 
 
-#Introduction (description of data and purpose of the analysis). (5 marks)  (Tobin)
+#Introduction (description of data and purpose of the analysis). (5 marks)  (Tobin)----
 
-#Data entry and data cleaning. (5 marks) (Tobin?)
+#Data entry and data cleaning. (5 marks) (Tobin?)----
 
 mammo <- read.csv('mammo.txt', header = TRUE)
 head(mammo)
@@ -60,7 +62,7 @@ summary(mammo$BI.RADS)
 # TODO: Ask if Age is forced to be a parameter 
 # Can these varibles be interpolated
 
-#Data visualisation and data summaries. (10 marks) (Tobin)
+#Data visualisation and data summaries. (10 marks) (Tobin)----
 
 pairs(mammo) # need to make prettier
 
@@ -69,13 +71,28 @@ ggpairs(mammo[, 2:6])
 par(mfrow=c(2,2))
 ggplot(data = mammo, aes(y= Age, x=BI.RADS )) + geom_point()
 
-#Model fitting and model selection. (5 marks) (Lily)
+#Model fitting and model selection. (5 marks) (Lily)----
 
-mammo[!is.na(mammo$Age),] # Use complete data for models
+complete= 
 
-#Justification for choice of final model. (5 marks) (Lily)
+complete=mammo[!is.na(mammo$Age),] # Use complete data for models
 
-#Interpretation of parameters from final model. (5 marks)  (Lily)
+mod.full <- glm(formula = Severity ~ Age + Shape + Margin + Density,
+               family = binomial(link = logit),
+               data = mammo) #Defining full model
+summary(mod.full)
 
-#Predicting probabilities and interpretation. (10 marks) (James?) 😩
+s2 <- sum((mod.full$residuals)^2)/mod.full$df
 
+mod.step <- step(mod.full)
+
+#Justification for choice of final model. (5 marks) (Lily)----
+
+#Interpretation of parameters from final model. (5 marks)  (Lily)-----
+
+#Predicting probabilities and interpretation. (10 marks) (James?) 😩----
+
+pred.CV <- data.frame(YoungestHouseholdMember=seq(min(DogPark$YoungestHouseholdMember,na.rm=TRUE),
+                                                  max(DogPark$YoungestHouseholdMember,na.rm=TRUE),
+                                                  length.out=100))
+pred.CV$CurrentlyVisit.hat <- predict(mod.fit,newdata=pred.CV)
