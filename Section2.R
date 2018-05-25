@@ -96,3 +96,6 @@ pred.CV <- data.frame(YoungestHouseholdMember=seq(min(DogPark$YoungestHouseholdM
                                                   max(DogPark$YoungestHouseholdMember,na.rm=TRUE),
                                                   length.out=100))
 pred.CV$CurrentlyVisit.hat <- predict(mod.fit,newdata=pred.CV)
+
+
+C#ool
