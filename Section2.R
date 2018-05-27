@@ -1,8 +1,8 @@
 # Libraries----
 
 library(ggplot2)
-install.packages("GGally") # Not needed but it looks cool as shit
 library(GGally)
+source('conf_int_prop.R')
 
 
 #Introduction (description of data and purpose of the analysis). (5 marks)  (Tobin)----
@@ -64,12 +64,71 @@ summary(mammo$BI.RADS)
 
 #Data visualisation and data summaries. (10 marks) (Tobin)----
 
-pairs(mammo) # need to make prettier
+pairs(mammo[2:6]) # need to make prettier # Lily: I cut out BI.RADS
 
 ggpairs(mammo[, 2:6])
 
-par(mfrow=c(2,2))
+par(mfrow=c(2,2)) # TOBIN IF YOU MAKE PLOTS A MATRIX PLEASE SET IT BACK TO ONE AFTER
 ggplot(data = mammo, aes(y= Age, x=BI.RADS )) + geom_point()
+par(mfrow = c(1,1))
+
+ggplot(data = mammo, aes(y = factor(Severity), x = Age)) + 
+  geom_boxplot()
+
+ggplot(data = mammo, aes(y = factor(Severity), x = Shape)) + 
+  geom_histogram()
+
+# Confidence Intervals
+
+# Age
+# For Age I had to split the ages into categories
+
+summary(mammo$Age)
+
+hist(mammo$Age)
+mammo$ageGroup <- cut(mammo$Age,
+                        breaks = c(0,20,40,60,80),
+                        labels = c("20 and Under","21-40","41-60","Over 60"))
+
+mammo$ageGroup[mammo$Age == 60]
+
+confidenceInt <- mammo %>% 
+  split(.$ageGroup) %>%
+  map_df(~conf_int_prop(.$Severity), .id = "AgeGroup")
+
+ggplot(confidenceInt, aes(x = AgeGroup, y = Proportion)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymax = Upper, ymin = Lower))
+
+# Shape
+
+confidenceInt <- mammo %>% 
+  split(.$Shape) %>%
+  map_df(~conf_int_prop(.$Severity), .id = "Shape")
+
+ggplot(confidenceInt, aes(x = Shape, y = Proportion)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymax = Upper, ymin = Lower))
+
+# Margin
+
+confidenceInt <- mammo %>% 
+  split(.$Margin) %>%
+  map_df(~conf_int_prop(.$Severity), .id = "Margin")
+
+ggplot(confidenceInt, aes(x = Margin, y = Proportion)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymax = Upper, ymin = Lower))
+
+# Density
+
+confidenceInt <- mammo %>% 
+  split(.$Density) %>%
+  map_df(~conf_int_prop(.$Severity), .id = "Density")
+
+ggplot(confidenceInt, aes(x = Density, y = Proportion)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymax = Upper, ymin = Lower))
 
 #Model fitting and model selection. (5 marks) (Lily)----
 
