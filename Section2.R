@@ -100,6 +100,8 @@ ggplot(confidenceInt, aes(x = AgeGroup, y = Proportion)) +
   geom_point(size = 4) +
   geom_errorbar(aes(ymax = Upper, ymin = Lower))
 
+# We are 95% confident the true proportion of people 20 and under with a malignant mass lies between 3% and 14%
+
 # Shape
 
 confidenceInt <- mammo %>% 
@@ -151,10 +153,15 @@ summary(mod.step)
 
 #Predicting probabilities and interpretation. (10 marks) (James?) 😩----
 
-pred.CV <- data.frame(YoungestHouseholdMember=seq(min(DogPark$YoungestHouseholdMember,na.rm=TRUE),
-                                                  max(DogPark$YoungestHouseholdMember,na.rm=TRUE),
-                                                  length.out=100))
-pred.CV$CurrentlyVisit.hat <- predict(mod.fit,newdata=pred.CV)
+pred1 <- data.frame(Age=seq(min(mammo$Age,na.rm=TRUE), max(mammo$Age,na.rm=TRUE),length.out=74-2), Shape = "1")
+pred2 <- data.frame(Age=seq(min(mammo$Age,na.rm=TRUE), max(mammo$Age,na.rm=TRUE),length.out=74-2), Shape = "2")
+pred3 <- data.frame(Age=seq(min(mammo$Age,na.rm=TRUE), max(mammo$Age,na.rm=TRUE),length.out=74-2), Shape = "3")
+pred4 <- data.frame(Age=seq(min(mammo$Age,na.rm=TRUE), max(mammo$Age,na.rm=TRUE),length.out=74-2), Shape = "4")
 
+pred <- cbind(pred1, pred2, pred3, pred4)
+
+pred$Severity <- predict(mod.step,newdata=pred)
+
+head(pred)
 
 #Cool
