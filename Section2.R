@@ -1,6 +1,7 @@
 # Libraries----
 
-library(ggplot2)
+#library(ggplot2) #This is in tidyverse
+library(tidyverse)
 library(GGally)
 source('conf_int_prop.R')
 
@@ -147,6 +148,8 @@ s2
 mod.step <- step(mod.full, scale = s2) # woohoo it works
 summary(mod.step)
 
+
+
 #Justification for choice of final model. (5 marks) (Lily)----
 
 #Interpretation of parameters from final model. (5 marks)  (Lily)-----
@@ -163,5 +166,48 @@ pred <- cbind(pred1, pred2, pred3, pred4)
 pred$Severity <- predict(mod.step,newdata=pred)
 
 head(pred)
+
+
+
+
+predict <- predict(mod.step, type="response")
+predict.df <- data.frame(predict.prob = predict)
+
+predict.df.indexed <- data.frame(predict.df, id = row.names(predict.df))
+mammo.indexed <- data.frame(mammo, id = row.names(mammo))
+
+mammo.predict <- left_join(mammo.indexed, predict.df.indexed, by="id")
+mammo.predict <- mammo.predict[ , !names(mammo.predict) %in% c("id")]
+
+
+#Calculate the percentage that our model correctly predicts Severity
+mammo.predict %>%
+  mutate(predict = (predict.prob >= 0.5),
+         predict = as.integer(predict),
+         correct = (predict == Severity)) %>%
+  count(correct) %>%
+  summarise(hit.rate = n[2]/(n[1] + n[2]))
+
+# Using mod.step on the original non-missing data our prediction rate is 79.7%
+
+predict <- predict(mod.full, type="response")
+predict.df <- data.frame(predict.prob = predict)
+
+predict.df.indexed <- data.frame(predict.df, id = row.names(predict.df))
+mammo.indexed <- data.frame(mammo, id = row.names(mammo))
+
+mammo.predict <- left_join(mammo.indexed, predict.df.indexed, by="id")
+mammo.predict <- mammo.predict[ , !names(mammo.predict) %in% c("id")]
+
+
+#Calculate the percentage that our model correctly predicts Severity
+mammo.predict %>%
+  mutate(predict = (predict.prob >= 0.5),
+         predict = as.integer(predict),
+         correct = (predict == Severity)) %>%
+  count(correct) %>%
+  summarise(hit.rate = n[2]/(n[1] + n[2]))
+
+# Using mod.full on the original non-missing data our prediction rate is 81.5%. This is not significantly better than the reduced model so the reduced model is probably good
 
 #Cool
