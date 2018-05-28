@@ -210,4 +210,24 @@ mammo.predict %>%
 
 # Using mod.full on the original non-missing data our prediction rate is 81.5%. This is not significantly better than the reduced model so the reduced model is probably good
 
+predict <- predict(mod.step, newdata = mammo ,type="response")
+predict.df <- data.frame(predict.prob = predict)
+
+predict.df.indexed <- data.frame(predict.df, id = row.names(predict.df))
+mammo.indexed <- data.frame(mammo, id = row.names(mammo))
+
+mammo.predict <- left_join(mammo.indexed, predict.df.indexed, by="id")
+mammo.predict <- mammo.predict[ , !names(mammo.predict) %in% c("id")]
+
+
+#Calculate the percentage that our model correctly predicts Severity
+mammo.predict %>%
+  mutate(predict = (predict.prob >= 0.5),
+         predict = as.integer(predict),
+         correct = (predict == Severity)) %>%
+  count(correct) %>%
+  summarise(hit.rate = n[2]/(n[1] + n[2]))
+
+# Using mod.step on the original data which is ONLY MISSING SHAPE OR AGE our prediction rate is 79.6%
+
 #Cool
