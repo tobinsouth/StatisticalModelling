@@ -71,10 +71,14 @@ pairs(mammo[2:6]) # need to make prettier # Lily: I cut out BI.RADS
 mammo %>%
   mutate(Severity = as.factor(Severity)) %>%
   select(2:6) %>%
-  ggpairs(lower = list(continuous = "blank",
+  ggpairs(upper = list(continuous = "blank",
                        combo ="blank",
                        discrete = "blank",
-                       na = "blank")) # I think removing the lower half makes it look cleaner and those plots were pretty messy
+                       na = "blank"),
+          lower = list(continuous = "cor",
+                       combo = "box_no_facet",
+                       discrete = "facetbar",
+                       na = "na")) # I think removing the upper half makes it look cleaner and those plots were pretty messy
 
 #Here is an alternative if you guys like the full square
 mammo %>%
