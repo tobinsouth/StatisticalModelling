@@ -154,7 +154,7 @@ summary(mod.step)
 
 #Interpretation of parameters from final model. (5 marks)  (Lily)-----
 
-#Predicting probabilities and interpretation. (10 marks) (James?) 😩----
+#Predicting probabilities and interpretation. (10 marks) (James) ----
 
 pred1 <- data.frame(Age=seq(min(mammo$Age,na.rm=TRUE), max(mammo$Age,na.rm=TRUE),length.out=74-2), Shape = "1")
 pred2 <- data.frame(Age=seq(min(mammo$Age,na.rm=TRUE), max(mammo$Age,na.rm=TRUE),length.out=74-2), Shape = "2")
@@ -168,7 +168,7 @@ pred$Severity <- predict(mod.step,newdata=pred)
 head(pred)
 
 
-
+## This is my appraoch to prediction - James
 
 predict <- predict(mod.step, type="response")
 predict.df <- data.frame(predict.prob = predict)
