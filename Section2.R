@@ -67,7 +67,23 @@ summary(mammo$BI.RADS)
 
 pairs(mammo[2:6]) # need to make prettier # Lily: I cut out BI.RADS
 
-ggpairs(mammo[, 2:6])
+#James: This makes it easier to make changes to the dataset that only effects the plot
+mammo %>%
+  mutate(Severity = as.factor(Severity)) %>%
+  select(2:6) %>%
+  ggpairs(lower = list(continuous = "blank",
+                       combo ="blank",
+                       discrete = "blank",
+                       na = "blank")) # I think removing the lower half makes it look cleaner and those plots were pretty messy
+
+#Here is an alternative if you guys like the full square
+mammo %>%
+  mutate(Severity = as.factor(Severity)) %>%
+  select(2:6) %>%
+  ggpairs(lower = list(continuous = "cor",
+                       combo = "box_no_facet",
+                       discrete = "facetbar",
+                       na = "na"))
 
 par(mfrow=c(2,2)) # TOBIN IF YOU MAKE PLOTS A MATRIX PLEASE SET IT BACK TO ONE AFTER
 ggplot(data = mammo, aes(y= Age, x=BI.RADS )) + geom_point()
@@ -228,6 +244,6 @@ mammo.predict %>%
   count(correct) %>%
   summarise(hit.rate = n[2]/(n[1] + n[2]))
 
-# Using mod.step on the original data which is ONLY MISSING SHAPE OR AGE our prediction rate is 79.6%
+# Using mod.step on the original data which is ONLY MISSING SHAPE OR AGE our prediction rate is 79.6%. This means we only have 36 NAs
 
 #Cool
