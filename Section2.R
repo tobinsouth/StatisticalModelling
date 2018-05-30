@@ -271,4 +271,4 @@ mammo.predict %>%
 
 # Using mod.step on the original data which is ONLY MISSING SHAPE OR AGE our prediction rate is 79.6%. This means we only have 36 NAs
 
-#Cool
+#Coolboi
