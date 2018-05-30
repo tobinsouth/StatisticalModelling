@@ -8,6 +8,10 @@ source('conf_int_prop.R')
 
 #Introduction (description of data and purpose of the analysis). (5 marks)  (Tobin)----
 
+
+
+
+
 #Data entry and data cleaning. (5 marks) (Tobin?)----
 
 mammo <- read.csv('mammo.txt', header = TRUE)
@@ -44,6 +48,7 @@ mammo$Density <- factor(mammo$Density)
 summary(mammo$Density, exclude = FALSE) # 76 NAs
 
 class(mammo$Severity)
+mammo$Severity <- factor(mammo$Severity)
 summary(mammo$Severity, exclude = FALSE) # 0 NAs
 
 # Just for yolo, wont be used in model
@@ -63,7 +68,7 @@ summary(mammo$BI.RADS)
 # TODO: Ask if Age is forced to be a parameter 
 # Can these varibles be interpolated
 
-#Data visualisation and data summaries. (10 marks) (Tobin)----
+#Data visualisation and data summaries. (10 marks) 
 
 pairs(mammo[2:6]) # need to make prettier # Lily: I cut out BI.RADS
 
@@ -80,18 +85,8 @@ mammo %>%
                        discrete = "facetbar",
                        na = "na")) # I think removing the upper half makes it look cleaner and those plots were pretty messy
 
-#Here is an alternative if you guys like the full square
-mammo %>%
-  mutate(Severity = as.factor(Severity)) %>%
-  select(2:6) %>%
-  ggpairs(lower = list(continuous = "cor",
-                       combo = "box_no_facet",
-                       discrete = "facetbar",
-                       na = "na"))
 
-par(mfrow=c(2,2)) # TOBIN IF YOU MAKE PLOTS A MATRIX PLEASE SET IT BACK TO ONE AFTER
 ggplot(data = mammo, aes(y= Age, x=BI.RADS )) + geom_point()
-par(mfrow = c(1,1))
 
 ggplot(data = mammo, aes(y = factor(Severity), x = Age)) + 
   geom_boxplot()
@@ -271,4 +266,3 @@ mammo.predict %>%
 
 # Using mod.step on the original data which is ONLY MISSING SHAPE OR AGE our prediction rate is 79.6%. This means we only have 36 NAs
 
-#Coolboi
