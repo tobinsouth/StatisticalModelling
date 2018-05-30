@@ -171,7 +171,7 @@ s2
 mod.step <- step(mod.full, scale = s2) # woohoo it works
 summary(mod.step)
 
-# 
+# Backwards by significance
 
 mod.back <- mod.full
 
