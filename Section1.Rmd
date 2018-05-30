@@ -1,6 +1,6 @@
 ---
 title: "Section1"
-author: "Joshua Bean"
+author: "Joshua Bean, Miriam Slattery"
 date: "24/05/2018"
 output: pdf_document
 ---
@@ -77,10 +77,68 @@ To test for Normality, consider the Normal-QQ (top right) plot in Figure \ref{fi
 
 There is no formal test for independence in the data, instead we need to consider the way the data was collected. This data set was collected from children with congenital heart defects, implying there is a slim chance that there is any relationship between the individuals. Thus it appears that there is no connection between each subject, thus the data is independent to the best of our knowledge. 
 
-\section*{Do assumptions for model 2 and 3, can be briefer since I've already gone into detain about it here.}
+Now we have checked the assumptions for the multiple regression model, we also need to check the same assumptions for the two simple regression models. However since we have discussed them in considerable detail above, we will breifly discuss them for the simple models. 
+
+For the simple regression model in just Height, we have the following diagnostic plots.
+
+```{r, fig.height = 7,fig.weight = 5,fig.cap = "\\label{fig:lm2assumps}The four plots required to check the assumptions for the second linear model."}
+par(mfrow=c(2,2))
+plot(lm2)
+```
  
+Using Figure \ref{fig:lm2assumps}, we will check the following assumptions,
+
+\begin{itemize}
+\item{\textit{Linearity}}
+\begin{itemize}
+\item In the residuals vs fitted plot, the data follows a reasonably linear trend with an almost even spread of points above and below the horizontal line. Although this lack of linearity can be explained by the small data set, hence the data is approximately linear and the assumptions holds.
+\end{itemize}
+\item{\textit{Homoscedasticity}}
+\begin{itemize}
+\item In the residuals vs fitted plot, there is considerable fanning in the points, particularly for the smaller fitted values. Similarly in the scale location plot the data has some curvature present in it further implying a non-constant variance. However due to the small data set, this is insufficient evidence to invalidate the assumption of homoscedasticity. 
+\end{itemize}
+\item{\textit{Normality}}
+\begin{itemize}
+\item In the normal-QQ plot, we can see that the data follows an almost linear trend with significant deviation at the ends. However the small data set has an even bigger impact on normality as it does not satisfy the conditions of the central limit theorem, so we have insufficient evidence to invalidate the assumptiosn of normality. 
+\end{itemize}
+\item{\textit{Independence}}
+\begin{itemize}
+\item The data used to create this model is the same as that used to create the multiple regression model. Since the assumption of independence is satisfied in the previous model it is also satisfied in this model. 
+\end{itemize}
+\end{itemize}
+
+It should be noted that there is one point in this model that has significant leverage, however once again due to the small number of data points, one outlier has a much bigger affect than for larger data sets. 
 
 
+For the simple regression model in just Weight, we have the following diagnostic plots.
+
+```{r, fig.height = 7,fig.weight = 5,fig.cap = "\\label{fig:lm3assumps}The four plots required to check the assumptions for the third linear model."}
+par(mfrow=c(2,2))
+plot(lm3)
+```
+ 
+Using Figure \ref{fig:lm3assumps}, we will check the following assumptions,
+
+\begin{itemize}
+\item{\textit{Linearity}}
+\begin{itemize}
+\item In the residuals vs fitted plot, the data follows a reasonably linear trend with an almost even spread of points above and below the horizontal line. Although this lack of linearity can be explained by the small data set, hence the data is approximately linear and the assumptions holds.
+\end{itemize}
+\item{\textit{Homoscedasticity}}
+\begin{itemize}
+\item In the residuals vs fitted plot, there is considerable fanning in the points, particularly for the smaller fitted values. Similarly in the scale location plot the data has some curvature present in it further implying a non-constant variance. However due to the small data set, this is insufficient evidence to invalidate the assumption of homoscedasticity. 
+\end{itemize}
+\item{\textit{Normality}}
+\begin{itemize}
+\item In the normal-QQ plot, we can see that the data follows an almost linear trend with some deviation at the ends. However the small data set has an even bigger impact on normality as it does not satisfy the conditions of the central limit theorem. However this plot follows a significantly stronger trend of normality than the previous model discussed.
+\end{itemize}
+\item{\textit{Independence}}
+\begin{itemize}
+\item The data used to create this model is the same as that used to create the multiple regression model. Since the assumption of independence is satisfied in the previous model it is also satisfied in this model. 
+\end{itemize}
+\end{itemize}
+
+It should be noted that there is one point in this model that has significant leverage, however once again due to the small number of data points, one outlier has a much bigger affect than for larger data sets. Interestingly this one point in both models corresponds to the same child, a 3.86kg baby.
 
 
 
@@ -146,9 +204,32 @@ Since these two subspaces are one-dimensional, we can calculate the angle betwee
 \end{eqnarray*}
  
 Since the angle between these two subspaces is not $\frac{\pi}{2} \approx 1.57$, i.e they are not perpendicular, the two predictor variables are correlated. This reuslt is not surprising since taller children are generally heaver and vice versa. 
- 
+
+Now we have checked the model assumptions and discussed the angle between the subspaces of the simple models. We can now select a final model to be used in predicting the lengths of catheter used. In the multiple regression model fitted above, we saw that the coeffficients were statistically insignificant. This was then explained by looking into the angle between the two vector subspaces for Heigth and Weight, which showed that Height and Weight were moderately correlated. So it seems unnecessary to fit both Height and Weight as predictors, so to prevent overfitting we will look at using only the two predictor variables. 
+
+As far as distinguishing between the two simple regression models, the AIC statistic was considered, as AIC weighs up goodness of fit and the number of predictors, however since the number of predictors is the same between the two models, AIC is just a measure of goodness of fit. The two simple regression models, in terms of Height and Weight have AIC values, $71.19$ and $69.92$ respectively. Although the difference in these two values is very small, it implies that the simplre regression model as a function of Weight is slightly better than Height. 
+
+Similarly, we can look at plots of the data set with the prediction intervals overlaid, for both models to see if there is an obvious difference in the width or shape of these intervals. See figure \ref{fig:PredInts}.
+
+```{r, fig.height = 3,fig.weight = 5,fig.cap = "\\label{fig:PredInts}Prediction intervals plotted over the data for the two models under consideration.",warning=FALSE}
+par(mfrow=c(1,2))
+
+predicts.lm2 <- predict(lm2,interval="prediction")
+plot(catheter$Height,predicts.lm2[,1],xlab = 'Height',ylab='predicted value',main='Predicted value against Height')
+lines(lowess(catheter$Height,predicts.lm2[,2]))
+lines(lowess(catheter$Height,predicts.lm2[,3]))
+
+predicts.lm3 <- predict(lm3,interval="prediction")
+plot(catheter$Height,predicts.lm3[,1],xlab = 'Weight',ylab='predicted value',main='Predicted value against Weight')
+lines(lowess(catheter$Height,predicts.lm3[,2]))
+lines(lowess(catheter$Height,predicts.lm3[,3]))
+```
+
+Here we can see that the two plots are almost identical with a slightly tighter prediction interval for the model in terms of Weight. However as a result, the prediction interval is slightly wider for more extreme values of Weight. 
+
+Another approach considered in determining which model we should choose is cross validation, however this approach requires a partitioning the data into training and testing sets. Since we have only 12 data points, this partitioning will leave us with too little training data, so this idea was scrapped. 
+
+All that has been discussed above highlights that the two simple regression models are nearly identical. However the model corresponding to Height, satisfied the assumptions for linear regression slightly better than the model predicted by Weight. Thus the model we will choose to make the final predictions will be the second model, $\text{Length}\sim\text{Height}$. 
 
 
 
-
-x
