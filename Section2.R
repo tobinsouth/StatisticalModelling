@@ -157,6 +157,7 @@ ggplot(confidenceInt, aes(x = Density, y = Proportion)) +
 
 complete=!is.na(mammo$Age)&!is.na(mammo$Shape)&!is.na(mammo$Margin)&!is.na(mammo$Density) # Use complete data for models
 
+# Full Model
 mod.full <- glm(formula = Severity ~ Age + Shape + Margin + Density,
                family = binomial,
                data = mammo[complete,]) #Defining full model
@@ -165,10 +166,29 @@ summary(mod.full)
 s2 <- sum((mod.full$residuals)^2)/mod.full$df.residual
 s2
 
+# Stepwise Selection
+
 mod.step <- step(mod.full, scale = s2) # woohoo it works
 summary(mod.step)
 
+# Backwards by significance
 
+mod.back <- mod.full
+
+summary(mod.back)
+mod.back <- update(mod.back, .~. - Density)
+summary(mod.back)
+mod.back <- update(mod.back, .~. - Shape)
+summary(mod.back)
+
+### From prac 5
+summary(mod.full)
+summary(mod.back)
+summary(mod.step)
+qchisq(1-0.05, df = 7)
+anova(mod.step, mod.full) # reject hypothesis that all coefficients are equal
+
+anova(mod.step, mod.back)
 
 #Justification for choice of final model. (5 marks) (Lily)----
 
@@ -184,8 +204,9 @@ pred4 <- data.frame(Age=seq(min(mammo$Age,na.rm=TRUE), max(mammo$Age,na.rm=TRUE)
 pred <- cbind(pred1, pred2, pred3, pred4)
 
 pred$Severity <- predict(mod.step,newdata=pred)
+pred$SeverityTrans <- exp(pred$Severity)/(1+exp(pred$Severity))
 
-head(pred)
+plot(x = pred$Age, y = pred$SeverityTrans)
 
 
 ## This is my appraoch to prediction - James
@@ -250,4 +271,4 @@ mammo.predict %>%
 
 # Using mod.step on the original data which is ONLY MISSING SHAPE OR AGE our prediction rate is 79.6%. This means we only have 36 NAs
 
-#Cool
+#Coolboi
