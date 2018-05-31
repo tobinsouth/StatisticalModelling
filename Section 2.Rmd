@@ -118,8 +118,8 @@ mammo$BI.RADS <- as.numeric(mammo$BI.RADS)
 summary(mammo$BI.RADS, exclude = FALSE) # 3 NAs
 ```
 
-# TODO: Ask if Age is forced to be a parameter 
-# Can these varibles be interpolated
+# TODO: Ask if Age is forced to be a parameter (it ends up in there anyway)
+# Can these varibles be interpolated (no)
 
 ## Data Visualisation
 To examine the relationship between each of the indivual varibles, a plot of the relationships between the varible is made. 
@@ -141,4 +141,68 @@ Now I'll talk about the relationships between varibles but I'm sleepy and frankl
 
 Anyway,
 
+## Making a Model
 
+### Using the right data
+Firstly, we are only able to fit a model to entries in the data frame that are complete. To do this, we created a logical vector for all the data that references which data entries have information for all variables.
+
+``` {r complete}
+complete=!is.na(mammo$Age)&!is.na(mammo$Shape)&!is.na(mammo$Margin)&!is.na(mammo$Density) # Use complete data for models
+```
+
+### The Full Model
+
+As we begin the model creation process, our first step is to create a model that uses all of our predictor variables to model our response variable, severity. Of the 4 predictor variables, only age is a numerical variable. Shape, Margin, and Density are all categorical variables which contain levels. In r, when fitting a model to categorical variables, the model uses a reference category. The reference category for Shape should clearly be the combined 1 and 2 level, as each level seems to show a distinct difference in the proportion of malignant masses, and this combined level contains the greatest number of data entries. However for margin, choosing a reference category because more difficult. The default reference level 1 is not the best selection. As we saw from the confidence intervals, category 1 has a relatively low proportion malignant mass cases, while the other categories 2,3,4, and 5 do not deviate from one another all that much. With 1 as the reference level, all the other levels appear significantly different, when really it is 1 that is the oddball. Hence we must decide on another reference level. Category 4 has the largest number of data points, and the true proportion of malignant cases with a margin of 4 has a narrow range of possibilities relative to the other categories, meaning any other facets of the data will be more prevalent when fitting the model, therefore this is the reference point we will use.
+
+``` {r full}
+mammo$Margin <- relevel(mammo$Margin, ref="1")
+
+mod.full1 <- glm(formula = Severity ~ Age + Shape + Margin + Density,
+               family = binomial,
+               data = mammo[complete,])
+
+table(mammo$Margin)
+
+mammo$Margin <- relevel(mammo$Margin, ref="4")
+
+mod.full4 <- glm(formula = Severity ~ Age + Shape + Margin + Density,
+                 family = binomial,
+                 data = mammo[complete,])
+
+
+summary(mod.full1)
+summary(mod.full4)
+
+mod.full <- mod.full4
+```
+
+### Model by stepwise selection
+
+Pretty self explanatory: find the scale, r fits the model based on AIC values.
+
+``` {r stepwise}
+s2 <- sum((mod.full$residuals)^2)/mod.full$df.residual
+s2
+
+# Stepwise Selection
+
+mod.step <- step(mod.full, scale = s2)
+summary(mod.step)
+```
+
+
+
+```{r compare}
+summary(mod.full)
+summary(mod.back)
+summary(mod.full)
+qchisq(1-0.05, df = 7)
+mod.step$deviance - mod.full$deviance 
+anova(mod.step, mod.full) # reject hypothesis that all coefficients are equal
+
+qchisq(1-0.05, df = 2)
+mod.step$deviance - mod.back$deviance
+anova(mod.step, mod.back) # These literally say the same thing but in the prac we use the difference
+
+AIC(mod.full, mod.step, mod.back)
+```

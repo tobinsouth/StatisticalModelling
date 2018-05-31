@@ -204,9 +204,11 @@ summary(mod.full3)
 summary(mod.full4)
 summary(mod.full5)
 
-## HELP IDK WHICH ONE TO PICK
+table(mammo$Margin)
 
-mod.full <- mod.full3 # Picked randomly
+## We should use 4
+
+mod.full <- mod.full4
 
 s2 <- sum((mod.full$residuals)^2)/mod.full$df.residual
 s2
