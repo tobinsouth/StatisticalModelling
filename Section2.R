@@ -128,6 +128,8 @@ ggplot(confidenceInt, aes(x = Shape, y = Proportion)) +
   geom_point(size = 4) +
   geom_errorbar(aes(ymax = Upper, ymin = Lower))
 
+## Combine Shape 1 and 2
+
 # Margin
 
 confidenceInt <- mammo %>% 
@@ -157,6 +159,8 @@ mod.full <- glm(formula = Severity ~ Age + Shape + Margin + Density,
                family = binomial,
                data = mammo[complete,]) #Defining full model
 summary(mod.full)
+
+## Relevel margin
 
 s2 <- sum((mod.full$residuals)^2)/mod.full$df.residual
 s2
