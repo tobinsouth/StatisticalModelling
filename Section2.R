@@ -249,12 +249,17 @@ AIC(mod.full, mod.step, mod.back)
 
 #Predicting probabilities and interpretation. (10 marks) (James) ----
 
-pred1 <- data.frame(Age=seq(min(mammo$Age,na.rm=TRUE), max(mammo$Age,na.rm=TRUE),length.out=74-2), Shape = "1")
-pred2 <- data.frame(Age=seq(min(mammo$Age,na.rm=TRUE), max(mammo$Age,na.rm=TRUE),length.out=74-2), Shape = "2")
-pred3 <- data.frame(Age=seq(min(mammo$Age,na.rm=TRUE), max(mammo$Age,na.rm=TRUE),length.out=74-2), Shape = "3")
-pred4 <- data.frame(Age=seq(min(mammo$Age,na.rm=TRUE), max(mammo$Age,na.rm=TRUE),length.out=74-2), Shape = "4")
+pred1 <- predict(mod.step, newdata = data.frame(Age=seq(from=10, to=80, by=10), Shape = "1 and 2"), type = "response")
+pred3 <- predict(mod.step, newdata = data.frame(Age=seq(from=10, to=80, by=10), Shape = "3"), type = "response")
+pred4 <- predict(mod.step, newdata = data.frame(Age=seq(from=10, to=80, by=10), Shape = "4"), type = "response")
 
-pred <- cbind(pred1, pred2, pred3, pred4)
+pred <- cbind(pred1, pred3, pred4)
+
+diag.table <- data.frame(ifelse(pred>0.5, 1, 0), row.names = seq(from=10, to=80, by=10))
+colnames(diag.table) <- c("Round or Oval", "Lobular", "Irregular")
+
+diag.table1 <- data.frame(round(pred, 2), row.names = seq(from=10, to=80, by=10))
+colnames(diag.table1) <- c("Round or Oval", "Lobular", "Irregular")
 
 pred$Severity <- predict(mod.step,newdata=pred)
 pred$SeverityTrans <- exp(pred$Severity)/(1+exp(pred$Severity))

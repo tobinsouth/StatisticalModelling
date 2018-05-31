@@ -206,3 +206,79 @@ anova(mod.step, mod.back) # These literally say the same thing but in the prac w
 
 AIC(mod.full, mod.step, mod.back)
 ```
+
+
+### Prediction to verify model
+
+Another way of assessing the goodness of fit of a model it to see how well predicts values. This works especially well for predicting binary outcomes as you can calculate a simple proportion of correct predictions. Firstly we predicted values for the data that was used to fit the model. This gives us an about 79.6% success rate.
+
+```{r}
+predict <- predict(mod.step, newdata = mammo ,type="response")
+predict.df <- data.frame(predict.prob = predict)
+
+predict.df.indexed <- data.frame(predict.df, id = row.names(predict.df))
+mammo.indexed <- data.frame(mammo, id = row.names(mammo))
+
+mammo.predict <- left_join(mammo.indexed, predict.df.indexed, by="id")
+mammo.predict <- mammo.predict[ , !names(mammo.predict) %in% c("id")]
+
+
+#Calculate the percentage that our model correctly predicts Severity
+mammo.predict %>%
+  mutate(predict = (predict.prob >= 0.5),
+         predict = as.integer(predict),
+         correct = (predict == Severity)) %>%
+  count(correct) %>%
+  summarise(hit.rate = n[2]/(n[1] + n[2])) %>%
+  first() %>%
+  round(3)
+```
+
+The second approach is to fit the model to only half of the data we have available and then attempt to predict the values of the other half of the data. Doing this we get a success rate of about 78.7% which is barely less than above. This is evidence to justify our model as valid and useful for prediction. 
+
+
+```{r}
+train <- slice(mammo[complete,], 1:400)
+test <- slice(mammo[complete,], 401:831)
+
+mod.train <- glm(Severity ~ Age + Shape, data = train, family = "binomial")
+
+predict <- predict(mod.train, newdata = test ,type="response")
+predict.df <- data.frame(predict.prob = predict)
+
+predict.df.indexed <- data.frame(predict.df, id = row.names(predict.df))
+mammo.indexed <- data.frame(test, id = row.names(test))
+
+mammo.predict <- left_join(mammo.indexed, predict.df.indexed, by="id")
+mammo.predict <- mammo.predict[ , !names(mammo.predict) %in% c("id")]
+
+
+#Calculate the percentage that our model correctly predicts Severity
+mammo.predict %>%
+  mutate(predict = (predict.prob >= 0.5),
+         predict = as.integer(predict),
+         correct = (predict == Severity)) %>%
+  count(correct) %>%
+  summarise(hit.rate = n[2]/(n[1] + n[2])) %>%
+  first() %>%
+  round(3)
+```
+
+
+
+Prediction can also be used to inform clinical decisions. To that end we produced a table that gives predictive probablilties for different ages and shapes.
+
+```{r}
+pred1 <- predict(mod.step, newdata = data.frame(Age=seq(from=10, to=80, by=10), Shape = "1 and 2"), type = "response")
+pred3 <- predict(mod.step, newdata = data.frame(Age=seq(from=10, to=80, by=10), Shape = "3"), type = "response")
+pred4 <- predict(mod.step, newdata = data.frame(Age=seq(from=10, to=80, by=10), Shape = "4"), type = "response")
+
+pred <- cbind(pred1, pred3, pred4)
+
+diag.table <- data.frame(round(pred, 2), row.names = seq(from=10, to=80, by=10))
+colnames(diag.table) <- c("Round or Oval", "Lobular", "Irregular")
+diag.table
+```
+
+
+Above each row represents a different age and each column a different shape.
