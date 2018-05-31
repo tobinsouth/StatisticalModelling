@@ -15,11 +15,11 @@ source('conf_int_prop.R')
 # Part B: Logistic Regression
 
 ## Introduction 
-Breast cancer was the second most commonly diagnosed cancer in Australia in 2013 [^1]. The most effecitive method for breast cancer screening is Mammography. To confirm the diagnoisis, invasive biopsies are perfomed. However, 70% of biopsies come back benign, indicating a high false positive rate in Mammography. To improve this process several computer-aided diagnosis (CAD) systems have been developed to help aid clinicians in making informed diagnoses.
+Breast cancer was the second most commonly diagnosed cancer in Australia in 2013 [^1]. The most effective method for breast cancer screening is Mammography. To confirm the diagnosis, invasive biopsies are performed. However, 70% of biopsies come back benign, indicating a high false positive rate in Mammography. To improve this process several computer-aided diagnosis (CAD) systems have been developed to help aid clinicians in making informed diagnoses.
 
-The data in this examination contains 961 mammographic mass lesions with 445 of those lesions being malignant, given by the indicator varible Severity. Addionally for each of these lesions there are three attributes from the Breast Imaging Reporting and Data System (BI-RADS), including the lesion shape (round= 1, oval= 2, lobular= 3, irregular= 4), the margin (circumscribed= 1, microlobulated= 2, obscured= 3, ill-defined= 4, spiculated= 5) and the density (high= 1, iso= 2, low= 3, fat-containing= 4). 
+The data in this examination contains 961 mammographic mass lesions with 445 of those lesions being malignant, given by the indicator variable Severity. Additionally for each of these lesions there are three attributes from the Breast Imaging Reporting and Data System (BI-RADS), including the lesion shape (round= 1, oval= 2, lobular= 3, irregular= 4), the margin (circumscribed= 1, microlobulated= 2, obscured= 3, ill-defined= 4, spiculated= 5) and the density (high= 1, iso= 2, low= 3, fat-containing= 4). 
 
-This apprach will attempt to develop a logistic predictive model for mammographic mass severity using the available predictor variables and to obtain predicted probabilities of mass severity that can used by clinicians to make informed diagnoses.
+This approach will attempt to develop a logistic predictive model for mammographic mass severity using the available predictor variables and to obtain predicted probabilities of mass severity that can used by clinicians to make informed diagnoses.
 
 
 [^1]: Australian Institute of Health and Welfare, Cancer compendium: information and trends by cancer type, https://www.aihw.gov.au/reports/cancer/cancer-compendium-information-and-trends-by-cancer-type/report-contents/breast-cancer-in-australia,  [Accessed May 2018].
@@ -32,7 +32,7 @@ mammo <- read.csv('mammo.txt', header = TRUE)
 head(mammo)
 ```
 
-After taking the data it is clear there are a few key issues to deal with in cleaning the data. The first is the incorrect classes of several of the varibles and, as can be seen below, there are a number of data points that are missing certain attributes, these are currently set to "?". but should be set to "NA", for approciate use within the models. These data points could be removed as they are missing some data, however this should not be done for two reasons. Firstly, incomplete data should not be thrown away as it may still contain valueble ifnormation. Furturemore, the final model may not include some of the predicor attributes, and some of the currently incomplete data may not be missing infomartion in any of the include attributes. 
+After taking the data it is clear there are a few key issues to deal with in cleaning the data. The first is the incorrect classes of several of the variables and, as can be seen below, there are a number of data points that are missing certain attributes, these are currently set to "?". but should be set to "NA", for appropriate use within the models. These data points could be removed as they are missing some data, however this should not be done for two reasons. Firstly, incomplete data should not be thrown away as it may still contain valuable information. Furthermore, the final model may not include some of the predictor attributes, and some of the currently incomplete data may not be missing information in any of the include attributes. 
 
 ```{r}
 table(mammo$Severity)
@@ -70,7 +70,7 @@ mammo$Age[mammo$Age == "?"] <- NA
 mammo$Age <- as.numeric(mammo$Age)
 summary(mammo$Age, exclude = FALSE) 
 ```
-Age has its 5 missing data points set to NA and the varible is set to numeric. 
+Age has its 5 missing data points set to NA and the variable is set to numeric. 
 ```{r}
 class(mammo$Shape)
 mammo$Shape <- as.character(mammo$Shape)
@@ -78,7 +78,7 @@ mammo$Shape[mammo$Shape == "?"] <- NA
 mammo$Shape <- factor(mammo$Shape)
 summary(mammo$Shape, exclude = FALSE) 
 ```
-Shape has its 31 missing data points set to NA and the varible is set to a factor 
+Shape has its 31 missing data points set to NA and the variable is set to a factor 
 
 ```{r}
 class(mammo$Margin)
@@ -87,7 +87,7 @@ mammo$Margin[mammo$Margin == "?"] <- NA
 mammo$Margin <- factor(mammo$Margin)
 summary(mammo$Margin, exclude = FALSE) 
 ```
-Margin has its 48 missing data points set to NA and the varible is set to a factor 
+Margin has its 48 missing data points set to NA and the variable is set to a factor 
 
 ```{r}
 class(mammo$Density)
@@ -96,7 +96,7 @@ mammo$Density[mammo$Density == "?"] <- NA
 mammo$Density <- factor(mammo$Density)
 summary(mammo$Density, exclude = FALSE) 
 ```
-Density has its 76 missing data points set to NA and the varible is set to a factor 
+Density has its 76 missing data points set to NA and the variable is set to a factor 
 
 ```{r}
 class(mammo$Severity)
@@ -106,7 +106,7 @@ summary(mammo$Severity, exclude = FALSE)
 Severity is set to a integer.
 
 
-Finally, BI-RADS has it's 2 missing data points set to NA. Addintioally, the data has a clear outlier in it that is set to NA aswell. Again, this is not overly important as BI-RADS will not be used as a predictor in this model.
+Finally, BI-RADS has it's 2 missing data points set to NA. Additionally, the data has a clear outlier in it that is set to NA as well. Again, this is not overly important as BI-RADS will not be used as a predictor in this model.
 ```{r}
 class(mammo$BI.RADS)
 mammo$BI.RADS <- as.character(mammo$BI.RADS)
@@ -118,11 +118,10 @@ mammo$BI.RADS <- as.numeric(mammo$BI.RADS)
 summary(mammo$BI.RADS, exclude = FALSE) # 3 NAs
 ```
 
-# TODO: Ask if Age is forced to be a parameter (it ends up in there anyway)
 # Can these varibles be interpolated (no)
 
 ## Data Visualisation
-To examine the relationship between each of the indivual varibles, a plot of the relationships between the varible is made. 
+To examine the relationship between each of the individual variables, a plot of the relationships between the variable is made. 
 ```{r, warning=FALSE}
 mammo %>%
   mutate(Severity = as.factor(Severity)) %>%
@@ -137,9 +136,15 @@ mammo %>%
                        na = "na")) 
 ```
 
-Now I'll talk about the relationships between varibles but I'm sleepy and frankly that density is giving me the middle finger so I'll do it tomorrow.
+Age is mostly normally distributed around a mean of 39.48. Shape and Margin have a slight linear increase with age but Density does not. Severity appears to have a correlation between being malignant and a higher age.
 
-Anyway,
+Shape has a large portion in the lobular category, this category also has a high proportion of malignancy.
+
+Margin has a strong correlation between the first category, circumscribed, and being benign.The second category has very little data and may not be of much value to the model.
+
+Density has a overwhelming popularity of the third class of "low". This makes it difficult to mind any significant findings with respect to how the classes effect the Severity.
+
+Finally Severity has a mostly balanced proportion of benign to malignant which is ideal for fitting an accurate model.
 
 ## Making a Model
 
@@ -190,7 +195,15 @@ mod.step <- step(mod.full, scale = s2)
 summary(mod.step)
 ```
 
+```{r}
+mod.back <- mod.full
 
+summary(mod.back)
+mod.back <- update(mod.back, .~. - Density)
+summary(mod.back)
+mod.back <- update(mod.back, .~. - Shape)
+summary(mod.back)
+```
 
 ```{r compare}
 summary(mod.full)
@@ -266,7 +279,7 @@ mammo.predict %>%
 
 
 
-Prediction can also be used to inform clinical decisions. To that end we produced a table that gives predictive probablilties for different ages and shapes.
+Prediction can also be used to inform clinical decisions. To that end we produced a table that gives predictive probabilities for different ages and shapes.
 
 ```{r}
 pred1 <- predict(mod.step, newdata = data.frame(Age=seq(from=10, to=80, by=10), Shape = "1 and 2"), type = "response")
