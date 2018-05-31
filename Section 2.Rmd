@@ -100,10 +100,10 @@ Density has its 76 missing data points set to NA and the varible is set to a fac
 
 ```{r}
 class(mammo$Severity)
-mammo$Severity <- factor(mammo$Severity)
+mammo$Severity <- as.numeric(mammo$Severity)
 summary(mammo$Severity, exclude = FALSE)
 ```
-Severity is set to a factor 
+Severity is set to a integer.
 
 
 Finally, BI-RADS has it's 2 missing data points set to NA. Addintioally, the data has a clear outlier in it that is set to NA aswell. Again, this is not overly important as BI-RADS will not be used as a predictor in this model.
@@ -138,3 +138,7 @@ mammo %>%
 ```
 
 Now I'll talk about the relationships between varibles but I'm sleepy and frankly that density is giving me the middle finger so I'll do it tomorrow.
+
+Anyway,
+
+
