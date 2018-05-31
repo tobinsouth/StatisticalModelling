@@ -322,3 +322,72 @@ mammo.predict %>%
 
 # Using mod.step on the original data which is ONLY MISSING SHAPE OR AGE our prediction rate is 79.6%. This means we only have 36 NAs
 
+## Cross-Validation
+
+#Split data into two parts
+train <- slice(mammo[complete,], 1:400)
+test <- slice(mammo[complete,], 401:831)
+
+mod.train <- glm(Severity ~ Age + Shape, data = train, family = "binomial")
+
+predict <- predict(mod.train, newdata = test ,type="response")
+predict.df <- data.frame(predict.prob = predict)
+
+predict.df.indexed <- data.frame(predict.df, id = row.names(predict.df))
+mammo.indexed <- data.frame(test, id = row.names(test))
+
+mammo.predict <- left_join(mammo.indexed, predict.df.indexed, by="id")
+mammo.predict <- mammo.predict[ , !names(mammo.predict) %in% c("id")]
+
+
+#Calculate the percentage that our model correctly predicts Severity
+mammo.predict %>%
+  mutate(predict = (predict.prob >= 0.5),
+         predict = as.integer(predict),
+         correct = (predict == Severity)) %>%
+  count(correct) %>%
+  summarise(hit.rate = n[2]/(n[1] + n[2]))
+
+
+#Split data into two parts
+
+mod.train <- glm(Severity ~ Age + Margin, data = train, family = "binomial")
+
+predict <- predict(mod.train, newdata = test ,type="response")
+predict.df <- data.frame(predict.prob = predict)
+
+predict.df.indexed <- data.frame(predict.df, id = row.names(predict.df))
+mammo.indexed <- data.frame(test, id = row.names(test))
+
+mammo.predict <- left_join(mammo.indexed, predict.df.indexed, by="id")
+mammo.predict <- mammo.predict[ , !names(mammo.predict) %in% c("id")]
+
+
+#Calculate the percentage that our model correctly predicts Severity
+mammo.predict %>%
+  mutate(predict = (predict.prob >= 0.5),
+         predict = as.integer(predict),
+         correct = (predict == Severity)) %>%
+  count(correct) %>%
+  summarise(hit.rate = n[2]/(n[1] + n[2]))
+
+
+mod.train <- glm(Severity ~ Age + Shape + Margin, data = train, family = "binomial")
+
+predict <- predict(mod.train, newdata = test ,type="response")
+predict.df <- data.frame(predict.prob = predict)
+
+predict.df.indexed <- data.frame(predict.df, id = row.names(predict.df))
+mammo.indexed <- data.frame(test, id = row.names(test))
+
+mammo.predict <- left_join(mammo.indexed, predict.df.indexed, by="id")
+mammo.predict <- mammo.predict[ , !names(mammo.predict) %in% c("id")]
+
+
+#Calculate the percentage that our model correctly predicts Severity
+mammo.predict %>%
+  mutate(predict = (predict.prob >= 0.5),
+         predict = as.integer(predict),
+         correct = (predict == Severity)) %>%
+  count(correct) %>%
+  summarise(hit.rate = n[2]/(n[1] + n[2]))
