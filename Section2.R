@@ -120,6 +120,20 @@ ggplot(confidenceInt, aes(x = AgeGroup, y = Proportion)) +
 
 # Shape
 
+mammo$Shape.orig <- mammo$Shape
+
+confidenceInt <- mammo %>% 
+  split(.$Shape.orig) %>%
+  map_df(~conf_int_prop(.$Severity), .id = "Shape")
+
+ggplot(confidenceInt, aes(x = Shape, y = Proportion)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymax = Upper, ymin = Lower))
+
+levels(mammo$Shape)[levels(mammo$Shape)=="1"] <- "1 and 2"
+levels(mammo$Shape)[levels(mammo$Shape)=="2"] <- "1 and 2"
+table(mammo$Shape)
+
 confidenceInt <- mammo %>% 
   split(.$Shape) %>%
   map_df(~conf_int_prop(.$Severity), .id = "Shape")
@@ -127,8 +141,6 @@ confidenceInt <- mammo %>%
 ggplot(confidenceInt, aes(x = Shape, y = Proportion)) +
   geom_point(size = 4) +
   geom_errorbar(aes(ymax = Upper, ymin = Lower))
-
-## Combine Shape 1 and 2
 
 # Margin
 
@@ -155,12 +167,46 @@ ggplot(confidenceInt, aes(x = Density, y = Proportion)) +
 complete=!is.na(mammo$Age)&!is.na(mammo$Shape)&!is.na(mammo$Margin)&!is.na(mammo$Density) # Use complete data for models
 
 # Full Model
-mod.full <- glm(formula = Severity ~ Age + Shape + Margin + Density,
+
+mammo$Margin <- relevel(mammo$Margin, ref="1")
+
+mod.full1 <- glm(formula = Severity ~ Age + Shape + Margin + Density,
                family = binomial,
                data = mammo[complete,]) #Defining full model
-summary(mod.full)
 
-## Relevel margin
+mammo$Margin <- relevel(mammo$Margin, ref="2")
+
+mod.full2 <- glm(formula = Severity ~ Age + Shape + Margin + Density,
+                 family = binomial,
+                 data = mammo[complete,]) #Defining full model
+
+mammo$Margin <- relevel(mammo$Margin, ref="3")
+
+mod.full3 <- glm(formula = Severity ~ Age + Shape + Margin + Density,
+                 family = binomial,
+                 data = mammo[complete,]) #Defining full model
+
+mammo$Margin <- relevel(mammo$Margin, ref="4")
+
+mod.full4 <- glm(formula = Severity ~ Age + Shape + Margin + Density,
+                 family = binomial,
+                 data = mammo[complete,]) #Defining full model
+
+mammo$Margin <- relevel(mammo$Margin, ref="5")
+
+mod.full5 <- glm(formula = Severity ~ Age + Shape + Margin + Density,
+                 family = binomial,
+                 data = mammo[complete,]) #Defining full model
+
+summary(mod.full1)
+summary(mod.full2)
+summary(mod.full3)
+summary(mod.full4)
+summary(mod.full5)
+
+## HELP IDK WHICH ONE TO PICK
+
+mod.full <- mod.full3 # Picked randomly
 
 s2 <- sum((mod.full$residuals)^2)/mod.full$df.residual
 s2
@@ -183,13 +229,19 @@ summary(mod.back)
 ### From prac 5
 summary(mod.full)
 summary(mod.back)
-summary(mod.step)
+summary(mod.full)
 qchisq(1-0.05, df = 7)
+mod.step$deviance - mod.full$deviance #2202.106
 anova(mod.step, mod.full) # reject hypothesis that all coefficients are equal
 
-anova(mod.step, mod.back)
+qchisq(1-0.05, df = 2)
+mod.step$deviance - mod.back$deviance
+anova(mod.step, mod.back) # These literally say the same thing but in the prac we use the difference
+
+AIC(mod.full, mod.step, mod.back)
 
 #Justification for choice of final model. (5 marks) (Lily)----
+
 
 #Interpretation of parameters from final model. (5 marks)  (Lily)-----
 
