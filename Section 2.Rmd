@@ -160,6 +160,9 @@ complete=!is.na(mammo$Age)&!is.na(mammo$Shape)&!is.na(mammo$Margin)&!is.na(mammo
 As we begin the model creation process, our first step is to create a model that uses all of our predictor variables to model our response variable, severity. Of the 4 predictor variables, only age is a numerical variable. Shape, Margin, and Density are all categorical variables which contain levels. In r, when fitting a model to categorical variables, the model uses a reference category. The reference category for Shape should clearly be the combined 1 and 2 level, as each level seems to show a distinct difference in the proportion of malignant masses, and this combined level contains the greatest number of data entries. However for margin, choosing a reference category because more difficult. The default reference level 1 is not the best selection. As we saw from the confidence intervals, category 1 has a relatively low proportion malignant mass cases, while the other categories 2,3,4, and 5 do not deviate from one another all that much. With 1 as the reference level, all the other levels appear significantly different, when really it is 1 that is the oddball. Hence we must decide on another reference level. Category 4 has the largest number of data points, and the true proportion of malignant cases with a margin of 4 has a narrow range of possibilities relative to the other categories, meaning any other facets of the data will be more prevalent when fitting the model, therefore this is the reference point we will use.
 
 ``` {r full}
+levels(mammo$Shape)[levels(mammo$Shape)=="1"] <- "1 and 2"
+levels(mammo$Shape)[levels(mammo$Shape)=="2"] <- "1 and 2"
+
 mammo$Margin <- relevel(mammo$Margin, ref="1")
 
 mod.full1 <- glm(formula = Severity ~ Age + Shape + Margin + Density,
