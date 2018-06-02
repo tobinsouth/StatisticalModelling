@@ -146,6 +146,75 @@ Density has a overwhelming popularity of the third class of "low". This makes it
 
 Finally Severity has a mostly balanced proportion of benign to malignant which is ideal for fitting an accurate model.
 
+### Confidence intervals
+
+We made confidecne intervals because we could. We did this because it gave us another look into which variables were affecting our response variable. T
+
+``` {r}
+summary(mammo$Age)
+
+hist(mammo$Age)
+mammo$ageGroup <- cut(mammo$Age,
+                        breaks = c(0,20,40,60,80),
+                        labels = c("20 and Under","21-40","41-60","Over 60"))
+
+confidenceInt <- mammo %>% 
+  split(.$ageGroup) %>%
+  map_df(~conf_int_prop(.$Severity), .id = "AgeGroup")
+
+ggplot(confidenceInt, aes(x = AgeGroup, y = Proportion)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymax = Upper, ymin = Lower)) +
+  labs(y = "Proportion of Malignant Cases") +
+  ggtitle("Confidence Intervals for the Proportion of Malignant Cases per Age Group")
+
+# We are 95% confident the true proportion of people 20 and under with a malignant mass lies between 3% and 14%
+
+# Shape
+
+mammo$Shape.orig <- mammo$Shape
+
+confidenceInt <- mammo %>% 
+  split(.$Shape.orig) %>%
+  map_df(~conf_int_prop(.$Severity), .id = "Shape")
+
+ggplot(confidenceInt, aes(x = Shape, y = Proportion)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymax = Upper, ymin = Lower))
+
+levels(mammo$Shape)[levels(mammo$Shape)=="1"] <- "1 and 2"
+levels(mammo$Shape)[levels(mammo$Shape)=="2"] <- "1 and 2"
+table(mammo$Shape)
+
+confidenceInt <- mammo %>% 
+  split(.$Shape) %>%
+  map_df(~conf_int_prop(.$Severity), .id = "Shape")
+
+ggplot(confidenceInt, aes(x = Shape, y = Proportion)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymax = Upper, ymin = Lower))
+
+# Margin
+
+confidenceInt <- mammo %>% 
+  split(.$Margin) %>%
+  map_df(~conf_int_prop(.$Severity), .id = "Margin")
+
+ggplot(confidenceInt, aes(x = Margin, y = Proportion)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymax = Upper, ymin = Lower))
+
+# Density
+
+confidenceInt <- mammo %>% 
+  split(.$Density) %>%
+  map_df(~conf_int_prop(.$Severity), .id = "Density")
+
+ggplot(confidenceInt, aes(x = Density, y = Proportion)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymax = Upper, ymin = Lower))
+```
+
 ## Making a Model
 
 ### Using the right data
@@ -183,17 +252,14 @@ mod.full <- mod.full4
 
 ### Model by stepwise selection
 
-Pretty self explanatory: find the scale, r fits the model based on AIC values.
+Pretty self explanatory, r fits the model based on AIC values.
 
 ``` {r stepwise}
-s2 <- sum((mod.full$residuals)^2)/mod.full$df.residual
-s2
-
-# Stepwise Selection
-
-mod.step <- step(mod.full, scale = s2)
+mod.step <- step(mod.full, direction = "both", trace = 0)
 summary(mod.step)
 ```
+
+Here, we will be creating a model by removing the least significant variable. The first iteration this was easy as none fo the coefficients for density were significant. We then also removed Margin, as only 2 of the 4 coefficients were statistically significant.
 
 ```{r}
 mod.back <- mod.full
@@ -201,17 +267,21 @@ mod.back <- mod.full
 summary(mod.back)
 mod.back <- update(mod.back, .~. - Density)
 summary(mod.back)
-mod.back <- update(mod.back, .~. - Shape)
+mod.back <- update(mod.back, .~. - Margin)
 summary(mod.back)
 ```
+
+## Choosing models
+
+We now hve 3 model created, but which to choose? Each smaller model only required the removal of one variable.  First, we wanted to ensure that removing this variable actually had a significant impact on the model. To do this, we essentially checked if we could set the coefficients for that variable equal to 0. this could be found by comparing the difference in residual deviances to the q value (i cant describe this things (qchisq(1-0.05, df = 3))
 
 ```{r compare}
 summary(mod.full)
 summary(mod.back)
-summary(mod.full)
-qchisq(1-0.05, df = 7)
-mod.step$deviance - mod.full$deviance 
-anova(mod.step, mod.full) # reject hypothesis that all coefficients are equal
+summary(mod.step)
+qchisq(1-0.05, df = 3)
+mod.back$deviance - mod.full$deviance 
+anova(mod.back, mod.full) # reject hypothesis that all coefficients are equal
 
 qchisq(1-0.05, df = 2)
 mod.step$deviance - mod.back$deviance
@@ -287,6 +357,7 @@ pred3 <- predict(mod.step, newdata = data.frame(Age=seq(from=10, to=80, by=10), 
 pred4 <- predict(mod.step, newdata = data.frame(Age=seq(from=10, to=80, by=10), Shape = "4"), type = "response")
 
 pred <- cbind(pred1, pred3, pred4)
+}{- b0vf}
 
 diag.table <- data.frame(round(pred, 2), row.names = seq(from=10, to=80, by=10))
 colnames(diag.table) <- c("Round or Oval", "Lobular", "Irregular")
