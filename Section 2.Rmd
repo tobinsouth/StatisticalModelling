@@ -360,7 +360,6 @@ pred3 <- predict(mod.step, newdata = data.frame(Age=seq(from=10, to=80, by=10), 
 pred4 <- predict(mod.step, newdata = data.frame(Age=seq(from=10, to=80, by=10), Shape = "4"), type = "response")
 
 pred <- cbind(pred1, pred3, pred4)
-}{- b0vf}
 
 diag.table <- data.frame(round(pred, 2), row.names = seq(from=10, to=80, by=10))
 colnames(diag.table) <- c("Round or Oval", "Lobular", "Irregular")
