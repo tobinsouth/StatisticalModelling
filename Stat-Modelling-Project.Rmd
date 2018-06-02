@@ -1,0 +1,667 @@
+---
+title: "Statistical Modelling Project"
+author: "Joshua Bean, James Beck, Lily Harris, Miriam Slattery, Tobin South"
+date: "2 June 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.pos = 'H')
+```
+
+\tableofcontents
+
+#Introduction
+This report will explore two different forms of regression, multiple linear regression and logistic regression, through two different data sets. 
+
+Multiple linear regression will be performed on data about heart catheters in children. The aim is to be able to predict the length of catheter required for a child with the possible predictor variables of Height and Weight. First, we look at the relationship between predictors and the response variable to confirm that it is a linear relationship and that a linear model is appropriate. Then we will fit three models, one with both predictors and model with each single predictor. We will check the assumptions of linear models for each of these and compare the models. After examining the model subspaces, we will find that Height and Weight are correlated and neither is significant in the full model. Thus, we will select a simple regression model.
+
+
+INTRODUCTION STUFF FOR LOGISTIC MODEL....................................................
+
+
+
+
+
+#Multiple Linear Regression
+Heart cathetisation is sometimes performed on children with congenital heart defects. We want to find if it is possible to predict the required length of catheter. The height, weight and catheter length was recorded for 12 individuals.
+
+##Data Visualisation
+First, we enter the data into R to allow for analysis.
+
+```{r}
+Child<- c(1:12)
+Height<-c(108.7,161.29,95.25,100.33,115.57,97.79,109.22,57.15,93.98,59.69,83.82,147.32)
+Weight<-c(18.14,42.41,16.10,13.61,23.59,7.71,17.46,3.86,14.97,4.31,9.53,35.83)
+Length<-c(37,49.5,34.5,36,43,28,37,20,33.5,30.5,38.5,47.0)
+catheter <-data.frame(Child, Height, Weight, Length)
+```
+Now we should explore the relationship between the predictor variables and the response variable. To do so, we will create a pairwise scatter plot matrix as follows,
+
+```{r, fig.height = 5,fig.weight = 5,fig.cap = "\\label{fig:pairwisescat}A pariwise scatter plot of all variables."}
+pairs(subset(catheter, select=c(2:4)))
+```
+
+Before examining these plots closely, note that there are only 12 data points so there will be a lot of unexplained scatter and it is difficult to recognise trends. 
+
+To investigate the relationship between Length, the response variable and the two predictor variables, Heigth and Weight, we need to consider the two plots in the top right of Figure \ref{fig:pairwisescat}. 
+
+The scatter plot between Length and Weight (top centre plot) shows the relationship is strong, positive and linear. Similarly, the plot between Length and Height (top right) shows the relationship is moderate, positive and mostly linear with slight positive curvature. The trend is only moderate to moderately strong because for the lower values, there is some deviation from the strong trendline. So we can conclude that the relationship between the resonse and the predictor variables is positive linear.
+ 
+Now consider the relationship between the predictor variables, to look for correlation. To do so, consider the plot of Height against Weight (centre right plot), which shows the relationship is moderately strong, positive and mostly linear with slight positive curvature, and with a few outlying points below the curve. Although there is a small number of data points, we can see that the trend is predominantly linear.
+
+
+##Fitting Models
+Since the data is linear with respect to all variables, we will fit linear models to the data. As there are only two predictor variables, we can perform an exhaustive check for all three different models. These models are as follows,
+ 
+\begin{eqnarray*}
+\text{Length} &=& \beta_0 + \beta_1\text{Height} + \beta_2\text{Weight}\\
+\text{Length} &=& \beta_0 + \beta_1\text{Height}\\
+\text{Length} &=& \beta_0 + \beta_2\text{Weight}.
+\end{eqnarray*}
+ 
+These linear models will be fit using the lm() function built into R as below.
+ 
+```{r}
+lm1<-lm(Length~Height+Weight, data=catheter)
+lm2<-lm(Length~Height, data=catheter)
+lm3<-lm(Length~Weight, data=catheter)
+```
+ 
+ 
+##Assumption Checking
+For linear models of this form there are four assumptions to check, for each model, these assumptions are: linearity, homoscedasticity, normality and independence. Note that for multiple linear regression, we need to check for linearity and homoscedasticity between the residuals and the overall fitted data as well as between residuals and each predictor variable. For simple linear regression, the residuals vs fitted plot is simply the residuals against the one predictor variable.
+ 
+Now we will check the assumptions for the first model, $\text{Length} = \beta_0 + \beta_1\text{Height} + \beta_2\text{Weight}$, using the following diagnostic plots,
+ 
+```{r, fig.height = 9,fig.weight = 5,fig.cap = "\\label{fig:lm1assumps}The six plots required to thoroughly check the assumptions for the first linear model."}
+
+res1<-residuals(lm1)
+par(mfrow=c(3,2))
+plot(lm1,which=1)
+plot(lm1,which=2)
+plot(lm1,which=3)
+plot(lm1,which=5)
+plot(catheter$Height, res1,xlab = "Height",ylab="Residuals",main="Residuals vs Height")
+plot(catheter$Weight, res1,xlab = "Weight",ylab="Residuals",main="Residuals vs Weight")
+```
+ 
+\textit{\underline{Linearity}}
+
+To test for linearity between residuals and fitted values, consider the top left hand plot, residuals vs. fitted, in Figure \ref{fig:lm1assumps}.. If the data is linear, we would expect an equal number of points above and below the line '$y=0$' for each '$x$' value, with no curvature. For this data set, we can see that the data follows a reasonably linear trend with an equal spread of values above and below the horizontal line. Normally, the included red line may be helpful when discussing linearity. In this plot, the line clearly is not linear due to the sheer lack of data. Overall, there is insufficient evidence in the plot to invalidate the assumption of linearity. 
+ 
+To check for linearity between the residuals and the individual predictor variables, we need to consider the two bottom plots in Figure \ref{fig:lm1assumps}. In the residuals vs Height plot, we can see the data follows a similar trend to that described in the residuals vs fitted plot, once again due to the lack of data points, the assumption of linearity holds. In the residuals vs Weight plot, we can see that the data also follows a similar trend to the other two plots considered, thus the same justification can be applied to claim that the assumptions of linearity holds for the whole model. 
+ 
+\textit{\underline{Homoscedasticity}}
+ 
+To test for homoscedasticity between residuals and fitted values, consider the top left hand plot, residuals vs. fitted, in Figure \ref{fig:lm1assumps}. If the data is homoscedastic, we would expect to see an equal distance between the points and the horizontal line described above. However for this data set, we have that the plot has significant fanning, where the variance decreases as the Height and Weight increase. This is unsurprising since the data is of predominantly young children, with only two data points corresponding to large catheters (longer than 40cm). This explains why the variance is smaller for these values. Given the small number of data points, the assumption of homoscedasticity holds, albeit weakly. Another way to check for constant variance is to consider the scale location (center left) plot and look for linearity in the data points. However for this data set, we can see some curvature, which corresponds to the variance not being constant. 
+ 
+Now, to check homoscedasticity between residuals and height and weight independently, we need to consider the two bottom plots of \ref{fig:lm1assumps}. In both of these plots, we can see that the data follows a similar trend to that of the plot discussed above, with significant fanning. However this fanning will be due to the small data set, so once again the assumption of constant variance holds. 
+
+\textit{\underline{Normality}}
+ 
+To test for Normality, consider the Normal-QQ (top right) plot in Figure \ref{fig:lm1assumps}. If the residuals are Normally distributed, we would expect to see a straight, linear line following the trend of $y=x$. For this data set, we can see that in general it follows a straight line, with some significant deviation from the trend for lower values. This significant deviation implies some negative skewing in the distribution. However since there are only 12 data points, randomness that is intrinsic in this plot is expected. Thus given the small data set, the residuals appear to be passably normal, thus there is insufficient evidence to invalidate this assumption.
+ 
+\textit{\underline{Independence}}
+
+There is no formal test for independence in the data, instead we need to consider the way the data was collected. This data set was collected from children with congenital heart defects, implying there is a slim chance that there is any relationship between the individuals. Thus it appears that there is no connection between each subject, thus the data is independent to the best of our knowledge. 
+
+Now we have checked the assumptions for the multiple regression model, we also need to check the same assumptions for the two simple regression models. However since we have discussed them in considerable detail above, we will breifly discuss them for the simple models. 
+
+For the simple regression model in just Height, we have the following diagnostic plots.
+
+```{r, fig.height = 7,fig.weight = 5,fig.cap = "\\label{fig:lm2assumps}The four plots required to check the assumptions for the second linear model."}
+par(mfrow=c(2,2))
+plot(lm2)
+```
+ 
+Using Figure \ref{fig:lm2assumps}, we will check the following assumptions,
+
+\begin{itemize}
+\item{\textit{Linearity}}
+\begin{itemize}
+\item In the residuals vs fitted plot, the data follows a reasonably linear trend with an almost even spread of points above and below the horizontal line. Although this lack of linearity can be explained by the small data set, hence the data is approximately linear and the assumptions holds.
+\end{itemize}
+\item{\textit{Homoscedasticity}}
+\begin{itemize}
+\item In the residuals vs fitted plot, there is considerable fanning in the points, particularly for the smaller fitted values. Similarly in the scale location plot the data has some curvature present in it further implying a non-constant variance. However due to the small data set, this is insufficient evidence to invalidate the assumption of homoscedasticity. 
+\end{itemize}
+\item{\textit{Normality}}
+\begin{itemize}
+\item In the normal-QQ plot, we can see that the data follows an almost linear trend with significant deviation at the ends. However, the small data set has an even bigger impact on normality as it does not satisfy the conditions of the central limit theorem, so we have insufficient evidence to invalidate the assumptiosn of normality. 
+\end{itemize}
+\item{\textit{Independence}}
+\begin{itemize}
+\item The data used to create this model is the same as that used to create the multiple regression model. Since the assumption of independence is satisfied in the previous model it is also satisfied in this model. 
+\end{itemize}
+\end{itemize}
+
+It should be noted that there is one point in this model that has significant leverage, however once again due to the small number of data points, one outlier has a much bigger effect than for larger data sets. 
+
+
+For the simple regression model in just Weight, we have the following diagnostic plots.
+
+```{r, fig.height = 7,fig.weight = 5,fig.cap = "\\label{fig:lm3assumps}The four plots required to check the assumptions for the third linear model."}
+par(mfrow=c(2,2))
+plot(lm3)
+```
+ 
+Using Figure \ref{fig:lm3assumps}, we will check the following assumptions,
+
+\begin{itemize}
+\item{\textit{Linearity}}
+\begin{itemize}
+\item In the residuals vs fitted plot, the data follows a reasonably linear trend with an almost even spread of points above and below the horizontal line. This lack of linearity can be explained by the small data set, hence the data is approximately linear and the assumptions holds.
+\end{itemize}
+\item{\textit{Homoscedasticity}}
+\begin{itemize}
+\item In the residuals vs fitted plot, there is considerable fanning in the points, particularly for the smaller fitted values. Similarly, in the scale location plot the data has some curvature present in it further implying a non-constant variance. However, due to the small data set, this is insufficient evidence to invalidate the assumption of homoscedasticity. 
+\end{itemize}
+\item{\textit{Normality}}
+\begin{itemize}
+\item In the normal-QQ plot, we can see that the data follows an almost linear trend with some deviation at the ends. The small data set has an even bigger impact on normality as it does not satisfy the conditions of the central limit theorem. However this plot follows a significantly stronger trend of normality than the model with Height as a predictor.
+\end{itemize}
+\item{\textit{Independence}}
+\begin{itemize}
+\item The data used to create this model is the same as that used to create the multiple regression model. Since the assumption of independence is satisfied in the previous model it is also satisfied in this model. 
+\end{itemize}
+\end{itemize}
+
+It should be noted that there is one point in this model that has significant leverage, however once again due to the small number of data points, one outlier has a much bigger affect than for larger data sets. Interestingly, this one point in both models corresponds to the same child, a 3.86kg baby.
+
+
+##Comparing Models
+Now we can compare the coefficients of the predictor variables in the different linear models. Below are summaries of the three linear models.
+
+```{r}
+summary(lm1)
+summary(lm2)
+summary(lm3)
+```
+ 
+First we will consider the coefficients of Height, in the simple linear regression, we have $\beta_1 = 0.235$, where as in the multiple linear regression, we have, $\beta_1 = 0.077$. The significant difference in these values can be explained by the inclusion of Weight in the linear model. For the simple linear regression model, the intercept coefficient is, $\beta_0 = 12.124$, where as in the multiple linear regression, the intercept coefficient is, $\beta_0 = 21.008$. If we naively ignore the inclusion of Weight in the model, the larger coefficient of Height in the simple linear regression corresponds to a smaller intercept and vice versa. 
+ 
+When we include Weight in the multiple regression model, it has coefficient, $\beta_2 = 0.421$, in constrast to the simple regression model where the coefficient is, $\beta_2 =  0.611$. Once again, the large coefficient corresponds to a smaller intercept coefficient and vice versa. 
+ 
+Now for both simple regression models, the coefficients of Height and Weight (independently) are statistically significant and should be included in the model. However, for the multiple regression model, both coefficients are statistically insignificant implying a strong correlation between these two predictors. In performing model selection, we would choose to drop one of the non-significant predictor variables in the multiple regression model and simplify it to one of the single regression models. 
+ 
+##Interpreting Coefficients
+As an example of coefficient interpretation, consider the coefficient of Weight in the two models that use it as a predictor.
+
+For the simple regression model containing Weight, we can interpret the coefficient to mean that for any child, an increase in Weight by one (in kilograms) will result in an increase in length of the catheter tube by 0.611cm. 
+ 
+Similarly, for the multiple regression model the coefficient of Weight can be interpreted as, for an increase in one (kilogram) of Weight for a child of fixed Height, the length of the catheter tube will increase by 0.421cm.
+
+
+##Model as a Projection of Data on Subspaces 
+Up until now, we have considered the multiple linear regression as a linear function of the data, but it can also be thought of as projecting the data onto model subspaces. Let $\mathcal{L}_1$ be the model subspace corresponding to the simple linear regression with Height and $\mathcal{L}_2$ be the model subspace corresponding to the simple lienar regression with Weight. 
+ 
+$\mathcal{L}_1$ is the column space of the model matrix corresponding to the simple regression model with Height. Thus,
+ 
+\[
+\mathcal{L}_1 = \text{span}\left\{\begin{pmatrix}1\\1\\\vdots\\1\end{pmatrix}, \begin{pmatrix}108.7\\161.29\\\vdots\\147.32\end{pmatrix}\right\}.
+\]
+Similarly, $\mathcal{L}_2$ is the column space of the model matrix corresponding to the simple regression model with Weight. Hence we have,
+\[
+\mathcal{L}_2 = \text{span}\left\{\begin{pmatrix}1\\1\\\vdots\\1\end{pmatrix}, \begin{pmatrix}18.14\\42.41\\\vdots\\35.83\end{pmatrix}\right\}.
+\]
+
+Now consider the intersection of these two subspaces, 
+
+\begin{eqnarray*}
+\mathcal{L}_1 \cap \mathcal{L}_2 &=& \left\{\begin{pmatrix}1\\1\\\vdots\\1\end{pmatrix}, \begin{pmatrix}108.7\\161.29\\\vdots\\147.32\end{pmatrix}\right\}\cap\left\{\begin{pmatrix}1\\1\\\vdots\\1\end{pmatrix}, \begin{pmatrix}18.14\\42.41\\\vdots\\35.83\end{pmatrix}\right\}\\
+&=& \text{span}\left\{\begin{pmatrix}1\\1\\\vdots\\1\end{pmatrix}\right\}\\
+&=& \text{span}\{\boldsymbol{1}\}
+\end{eqnarray*}
+
+Thus, 
+
+\begin{eqnarray*}
+\{\mathcal{L}_1 \cap \mathcal{L}_2\}^\perp &=& \{\boldsymbol{1}\}^\perp.
+\end{eqnarray*}
+
+Now we need to consider the following subspaces,
+
+\begin{eqnarray*}
+\mathcal{L}_1\cap\{\mathcal{L}_1\cap\mathcal{L}_2\}^\perp &=& \text{span}\left\{ \begin{pmatrix}108.7\\161.29\\\vdots\\147.32\end{pmatrix}\right\}\\
+&=& \boldsymbol{h}\\
+\mathcal{L}_2\cap\{\mathcal{L}_1\cap\mathcal{L}_2\}^\perp &=& \text{span}\left\{ \begin{pmatrix}18.14\\42.41\\\vdots\\35.83\end{pmatrix}\right\}\\
+&=& \boldsymbol{w},
+\end{eqnarray*}
+
+where $\boldsymbol{h}$ is the column vector containing the values for Height and $\boldsymbol{h}$ is the column vector containing the values for Weight.
+
+These subspaces are the components in the models that are orthogonal to the intersection of the two models. That is to say it is the components that are not shared by either model, so if these two subspaces are orthogonal then the two models are disjoint. 
+ 
+Since these two subspaces are one-dimensional, we can calculate the angle between these two subspaces as follows.  
+
+\begin{eqnarray*}
+\theta &=& \cos^{-1}\left(\frac{\boldsymbol{h}^T\boldsymbol{w}}{||\boldsymbol{h}||||\boldsymbol{w}||}\right)\\
+&=& 0.322~~ \text{radians}.
+\end{eqnarray*}
+ 
+Since the angle between these two subspaces is not $\frac{\pi}{2} \approx 1.57$, they are not perpendicular, and so the two predictor variables are correlated. This reuslt is not surprising since taller children are generally heavier and vice versa. This could also be observed in the postive linear relationship observed in the Height vs. Weight scatterplot when considering relationships between variables.
+
+##Final Model Selection
+We can now select a final model to be used in predicting the lengths of catheter required for children. In the multiple regression model, we saw that the coeffficients were statistically insignificant. This was then explained by looking into the angle between the two vector subspaces for Height and Weight, which showed that Height and Weight were moderately correlated. Therefore, it seems unnecessary to fit both Height and Weight as predictors. We will avoid overfitting by using only the one of the predictor variables. 
+
+To select between the two simple regression models, we can use the AIC statistics, which weighs up goodness of fit against the number of predictors. Since the number of predictors is the same between the two models, AIC is just a measure of goodness of fit. The two simple regression models, in terms of Height and Weight have AIC values, $71.19$ and $69.92$ respectively. Although the difference in these two values is very small, it implies that the simple regression model as a function of Weight is a slightly better fit than Height. 
+
+Since we want to use the model for prediction, we can comapre the prediction intervals for both models as in figure \ref{fig:PredInts}.
+
+```{r, fig.height = 3,fig.weight = 5,fig.cap = "\\label{fig:PredInts}Prediction intervals plotted over the data for the two models under consideration.",warning=FALSE}
+par(mfrow=c(1,2))
+
+predicts.lm2 <- predict(lm2,interval="prediction")
+plot(catheter$Height,predicts.lm2[,1],xlab = 'Height',ylab='predicted value',main='Predicted value against Height')
+lines(lowess(catheter$Height,predicts.lm2[,2]))
+lines(lowess(catheter$Height,predicts.lm2[,3]))
+
+predicts.lm3 <- predict(lm3,interval="prediction")
+plot(catheter$Height,predicts.lm3[,1],xlab = 'Weight',ylab='predicted value',main='Predicted value against Weight')
+lines(lowess(catheter$Height,predicts.lm3[,2]))
+lines(lowess(catheter$Height,predicts.lm3[,3]))
+```
+
+Here we can see that the two plots are almost identical with a slightly tighter prediction interval for the model in terms of Weight. As a result, the prediction interval is slightly wider for more extreme values of Weight. 
+
+Another approach considered in determining which model we should choose is cross validation, however this approach requires a partitioning the data into training and testing sets. Since we have only 12 data points, this partitioning will leave us with too little training data and does not provide satisfactory comparison of the models.
+
+All that has been discussed above highlights that the two simple regression models are nearly identical. However the model corresponding to Weight, satisfied the assumptions for linear regression slightly better than the model predicted by Height. Thus, the model we will choose to make the final predictions will be the second model, $\text{Length} = \beta_0 + \beta_2\text{Weight}$. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Logistic Regression
+
+Breast cancer was the second most commonly diagnosed cancer in Australia in 2013 [^1]. The most effective method for breast cancer screening is mammography. To confirm the diagnosis, invasive biopsies are performed. However, 70% of biopsies come back benign, indicating a high false positive rate in mammographies. To improve this process several computer-aided diagnosis (CAD) systems have been developed to help aid clinicians in making informed diagnoses.
+
+The data in this examination contains 961 mammographic mass lesions with 445 of those lesions being malignant, given by the indicator variable Severity. Additionally for each of these lesions there are three attributes from the Breast Imaging Reporting and Data System (BI-RADS), including the lesion shape (round= 1, oval= 2, lobular= 3, irregular= 4), the margin (circumscribed= 1, microlobulated= 2, obscured= 3, ill-defined= 4, spiculated= 5) and the density (high= 1, iso= 2, low= 3, fat-containing= 4). 
+
+We will attempt to develop a logistic predictive model for mammographic mass severity using the available predictor variables and to obtain predicted probabilities of mass severity that can used by clinicians to make informed diagnoses.
+
+
+[^1]: Australian Institute of Health and Welfare, Cancer compendium: information and trends by cancer type, https://www.aihw.gov.au/reports/cancer/cancer-compendium-information-and-trends-by-cancer-type/report-contents/breast-cancer-in-australia,  [Accessed May 2018].
+
+## Data cleaning
+
+
+```{r}
+mammo <- read.csv('mammo.txt', header = TRUE)
+head(mammo)
+```
+
+A simple inspection of the data makes it clear that cleaning is required. There is the incorrect classes of several of the variables and, as can be seen below, there are a number of data points that are missing certain attributes. These are currently set to "?". but should be set to "NA", to comply with R's notation for missing data. These data points could be removed as they are missing some data, however this should not be done for two reasons. Firstly, incomplete data may still contain valuable information. Secondly, the final model may not include some of the predictor attributes, and so some incomplete data  may actually be complete for the predictors used in the final model. 
+
+```{r}
+table(mammo$Severity)
+```
+Severity has no missing data.
+```{r}
+table(mammo$Age) 
+```
+Age has 5 missing data points.
+```{r}
+table(mammo$Shape) 
+```
+Shape has 31 missing data points.
+
+```{r}
+table(mammo$Margin)
+```
+Margin has 48 missing data points.
+
+```{r}
+table(mammo$Density) 
+```
+Density has 76 missing data points.
+
+```{r}
+table(mammo$BI.RADS)
+```
+BI-RADS has 2 missing data points, but this class will not be used in our model, and is not of high importance.
+
+
+This data is now cleaned by setting "?"'s to NA's and fixing the attribute classes.
+```{r}
+class(mammo$Age)
+mammo$Age[mammo$Age == "?"] <- NA
+mammo$Age <- as.numeric(mammo$Age)
+summary(mammo$Age, exclude = FALSE) 
+```
+Age has its 5 missing data points set to NA and the variable is set to numeric. 
+```{r}
+class(mammo$Shape)
+mammo$Shape <- as.character(mammo$Shape)
+mammo$Shape[mammo$Shape == "?"] <- NA
+mammo$Shape <- factor(mammo$Shape)
+summary(mammo$Shape, exclude = FALSE) 
+```
+Shape has its 31 missing data points set to NA and the variable is set to a factor 
+
+```{r}
+class(mammo$Margin)
+mammo$Margin <- as.character(mammo$Margin)
+mammo$Margin[mammo$Margin == "?"] <- NA
+mammo$Margin <- factor(mammo$Margin)
+summary(mammo$Margin, exclude = FALSE) 
+```
+Margin has its 48 missing data points set to NA and the variable is set to a factor 
+
+```{r}
+class(mammo$Density)
+mammo$Density <- as.character(mammo$Density)
+mammo$Density[mammo$Density == "?"] <- NA
+mammo$Density <- factor(mammo$Density)
+summary(mammo$Density, exclude = FALSE) 
+```
+Density has its 76 missing data points set to NA and the variable is set to a factor 
+
+```{r}
+class(mammo$Severity)
+mammo$Severity <- as.numeric(mammo$Severity)
+summary(mammo$Severity, exclude = FALSE)
+```
+Severity is set to a integer.
+
+
+Finally, BI-RADS has it's 2 missing data points set to NA. Additionally, the data has a clear outlier in it that is set to NA as well. Again, this is not overly important as BI-RADS will not be used as a predictor in this model.
+```{r}
+class(mammo$BI.RADS)
+mammo$BI.RADS <- as.character(mammo$BI.RADS)
+mammo$BI.RADS[mammo$BI.RADS == "?"] <- NA
+mammo$BI.RADS <- factor(mammo$BI.RADS)
+summary(mammo$BI.RADS, exclude = FALSE) # 2 NAs, 1 outlier
+mammo$BI.RADS[mammo$BI.RADS == 55] <- NA # Set outlier to NA
+mammo$BI.RADS <- as.numeric(mammo$BI.RADS) 
+summary(mammo$BI.RADS, exclude = FALSE) # 3 NAs
+```
+
+# Can these varibles be interpolated (no)
+
+## Data Visualisation
+To examine the relationship between each of the individual variables, a plot of the relationships between the variable is made. 
+```{r, warning=FALSE}
+mammo %>%
+  mutate(Severity = as.factor(Severity)) %>%
+  select(2:6) %>%
+  ggpairs(upper = list(continuous = "blank",
+                       combo ="blank",
+                       discrete = "blank",
+                       na = "blank"),
+          lower = list(continuous = "cor",
+                       combo = "box_no_facet",
+                       discrete = "facetbar",
+                       na = "na")) 
+```
+
+Age is mostly normally distributed around a mean of 39.48. Shape and Margin have a slight linear increase with age but Density does not. Severity appears to have a correlation between being malignant and a higher age.
+
+Shape has a large portion in the lobular category, this category also has a high proportion of malignancy.
+
+Margin has a strong correlation between the first category, circumscribed, and being benign.The second category has very little data and may not be of much value to the model.
+
+Density has a overwhelming popularity of the third class of "low". This makes it difficult to mind any significant findings with respect to how the classes effect the Severity.
+
+Finally Severity has a mostly balanced proportion of benign to malignant which is ideal for fitting an accurate model.
+
+### Confidence intervals
+
+We created confidence intervals for further investigation of how the predictor variable and the response variable are interacting. They allow us to predict which variables will be statistically significant in our model.
+
+``` {r}
+summary(mammo$Age)
+
+hist(mammo$Age)
+mammo$ageGroup <- cut(mammo$Age,
+                        breaks = c(0,20,40,60,80),
+                        labels = c("20 and Under","21-40","41-60","Over 60"))
+
+confidenceInt <- mammo %>% 
+  split(.$ageGroup) %>%
+  map_df(~conf_int_prop(.$Severity), .id = "AgeGroup")
+
+ggplot(confidenceInt, aes(x = AgeGroup, y = Proportion)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymax = Upper, ymin = Lower)) +
+  labs(y = "Proportion of Malignant Cases") +
+  ggtitle("Confidence Intervals for the Proportion of Malignant Cases per Age Group")
+
+# We are 95% confident the true proportion of people 20 and under with a malignant mass lies between 3% and 14%
+
+# Shape
+
+mammo$Shape.orig <- mammo$Shape
+
+confidenceInt <- mammo %>% 
+  split(.$Shape.orig) %>%
+  map_df(~conf_int_prop(.$Severity), .id = "Shape")
+
+ggplot(confidenceInt, aes(x = Shape, y = Proportion)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymax = Upper, ymin = Lower))
+
+levels(mammo$Shape)[levels(mammo$Shape)=="1"] <- "1 and 2"
+levels(mammo$Shape)[levels(mammo$Shape)=="2"] <- "1 and 2"
+table(mammo$Shape)
+
+confidenceInt <- mammo %>% 
+  split(.$Shape) %>%
+  map_df(~conf_int_prop(.$Severity), .id = "Shape")
+
+ggplot(confidenceInt, aes(x = Shape, y = Proportion)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymax = Upper, ymin = Lower))
+
+# Margin
+
+confidenceInt <- mammo %>% 
+  split(.$Margin) %>%
+  map_df(~conf_int_prop(.$Severity), .id = "Margin")
+
+ggplot(confidenceInt, aes(x = Margin, y = Proportion)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymax = Upper, ymin = Lower))
+
+# Density
+
+confidenceInt <- mammo %>% 
+  split(.$Density) %>%
+  map_df(~conf_int_prop(.$Severity), .id = "Density")
+
+ggplot(confidenceInt, aes(x = Density, y = Proportion)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymax = Upper, ymin = Lower))
+```
+
+## Making a Model
+
+### Using the right data
+Firstly, we are only able to fit a model to entries in the data frame that are complete. To do this, we created a logical vector for all the data that references which data entries have information for all variables.
+
+``` {r complete}
+complete=!is.na(mammo$Age)&!is.na(mammo$Shape)&!is.na(mammo$Margin)&!is.na(mammo$Density) 
+```
+
+### The Full Model
+
+Firstly, we fit a model that uses all the predictor variables to model our response variable, Severity. Of the 4 predictor variables, only Age is a numerical variable. Shape, Margin, and Density are all categorical variables which contain levels. 
+
+In R, when fitting a model to categorical variables, the model uses a reference category. The reference category for Shape should clearly be the combined 1 and 2 level, as each level seems to show a distinct difference in the proportion of malignant masses, and this combined level contains the greatest number of data entries. 
+
+However, for Margin, choosing a reference category is more difficult. The default reference level 1 is not the best selection. As we saw from the confidence intervals, category 1 has a relatively low proportion of malignant mass cases, while categories 2,3,4, and 5 do not deviate from one another all that much. With 1 as the reference level, all the other levels appear significantly different, when really it is 1 that is odd. Hence we must decide on another reference level. Category 4 has the largest number of data points, and the true proportion of malignant cases with a margin of 4 has a narrow range of possibilities relative to the other categories, meaning any other facets of the data will be more prevalent when fitting the model. Therefore this is the reference point we will use.
+
+``` {r full}
+levels(mammo$Shape)[levels(mammo$Shape)=="1"] <- "1 and 2"
+levels(mammo$Shape)[levels(mammo$Shape)=="2"] <- "1 and 2"
+
+mammo$Margin <- relevel(mammo$Margin, ref="1")
+
+mod.full1 <- glm(formula = Severity ~ Age + Shape + Margin + Density,
+               family = binomial,
+               data = mammo[complete,])
+
+table(mammo$Margin)
+
+mammo$Margin <- relevel(mammo$Margin, ref="4")
+
+mod.full4 <- glm(formula = Severity ~ Age + Shape + Margin + Density,
+                 family = binomial,
+                 data = mammo[complete,])
+
+
+summary(mod.full1)
+summary(mod.full4)
+
+mod.full <- mod.full4
+```
+
+### Model by stepwise selection
+
+We will use step-wise selection to choose which predictors are significant in the model, based on the AIC values.
+
+``` {r stepwise}
+mod.step <- step(mod.full, direction = "both", trace = 0)
+summary(mod.step)
+```
+
+Here, we will be creating a model by removing the least significant variable. The first iteration was simple as none of the coefficients for Density were significant. We then also removed Margin, as only 2 of the 4 coefficients were statistically significant.
+
+```{r}
+mod.back <- mod.full
+
+summary(mod.back)
+mod.back <- update(mod.back, .~. - Density)
+summary(mod.back)
+mod.back <- update(mod.back, .~. - Margin)
+summary(mod.back)
+```
+
+## Choosing models
+
+We now hve 3 model created, but which to choose? Each smaller model only required the removal of one variable.  First, we wanted to ensure that removing this variable actually had a significant impact on the model. To do this, we essentially checked if we could set the coefficients for that variable equal to 0. this could be found by comparing the difference in residual deviances to the q value (i cant describe this things (qchisq(1-0.05, df = 3))
+
+```{r compare}
+summary(mod.full)
+summary(mod.back)
+summary(mod.step)
+qchisq(1-0.05, df = 3)
+mod.back$deviance - mod.full$deviance 
+anova(mod.back, mod.full) # reject hypothesis that all coefficients are equal
+
+qchisq(1-0.05, df = 2)
+mod.step$deviance - mod.back$deviance
+anova(mod.step, mod.back) # These literally say the same thing but in the prac we use the difference
+
+AIC(mod.full, mod.step, mod.back)
+```
+
+
+### Prediction to verify model
+
+Another way of assessing the goodness of fit of a model it to see how well predicts values. This works especially well for predicting binary outcomes as you can calculate a simple proportion of correct predictions. Firstly we predicted values for the data that was used to fit the model. This gives us an about 81.5% success rate.
+
+```{r}
+predict <- predict(mod.step, newdata = mammo ,type="response")
+predict.df <- data.frame(predict.prob = predict)
+
+predict.df.indexed <- data.frame(predict.df, id = row.names(predict.df))
+mammo.indexed <- data.frame(mammo, id = row.names(mammo))
+
+mammo.predict <- left_join(mammo.indexed, predict.df.indexed, by="id")
+mammo.predict <- mammo.predict[ , !names(mammo.predict) %in% c("id")]
+
+
+#Calculate the percentage that our model correctly predicts Severity
+mammo.predict %>%
+  mutate(predict = (predict.prob >= 0.5),
+         predict = as.integer(predict),
+         correct = (predict == Severity)) %>%
+  count(correct) %>%
+  summarise(hit.rate = n[2]/(n[1] + n[2])) %>%
+  first() %>%
+  round(3)
+```
+
+The second approach is to fit the model to only half of the data we have available and then attempt to predict the values of the other half of the data. Doing this we get a success rate of about 81% which is barely lower than above. This is evidence to justify our model as valid and useful for prediction. 
+
+
+```{r}
+train <- slice(mammo[complete,], 1:400)
+test <- slice(mammo[complete,], 401:831)
+
+mod.train <- glm(Severity ~ Age + Shape + Margin, data = train, family = "binomial")
+
+predict <- predict(mod.train, newdata = test ,type="response")
+predict.df <- data.frame(predict.prob = predict)
+
+predict.df.indexed <- data.frame(predict.df, id = row.names(predict.df))
+mammo.indexed <- data.frame(test, id = row.names(test))
+
+mammo.predict <- left_join(mammo.indexed, predict.df.indexed, by="id")
+mammo.predict <- mammo.predict[ , !names(mammo.predict) %in% c("id")]
+
+
+#Calculate the percentage that our model correctly predicts Severity
+mammo.predict %>%
+  mutate(predict = (predict.prob >= 0.5),
+         predict = as.integer(predict),
+         correct = (predict == Severity)) %>%
+  count(correct) %>%
+  summarise(hit.rate = n[2]/(n[1] + n[2])) %>%
+  first() %>%
+  round(3)
+```
+
+
+
+Prediction can also be used to inform clinical decisions. To that end we produced a table that gives predictive probabilities for different ages, shapes and margins.
+
+```{r results="asis"}
+for (age in seq(from = 20, to = 80, by = 10)) {
+pred1 <- predict(mod.step, newdata = data.frame(Age = age, Margin = c("1", "2", "3", "4", "5"), Shape = "1 and 2"), type = "response")
+pred3 <- predict(mod.step, newdata = data.frame(Age = age, Margin = c("1", "2", "3", "4", "5"), Shape = "3"), type = "response")
+pred4 <- predict(mod.step, newdata = data.frame(Age = age, Margin = c("1", "2", "3", "4", "5"), Shape = "4"), type = "response")
+
+pred <- cbind(pred1, pred3, pred4)
+
+diag.table <- data.frame(round(pred, 2), row.names = c("Circumscribed", "Microlobulated", "Obscured", "Ill-Defined", "Spiculated"))
+colnames(diag.table) <- c("Round or Oval", "Lobular", "Irregular")
+tab <- xtable(diag.table, caption = paste('Predictive probabilities for Age =', age))
+print(tab, type="latex")
+}
+```
+
+
+These tables represent the probability that a growth is malignant based on Shape and Margin for differnet ages. 
+
+
+
+
+
+
+
+
+
+
+#Teamwork Reflection
+As this project was completed in a team of five people, collaboration and communication were key. The first meeting was undertaken at the university campus where we all met face to face to partition the workload evenly between all members involved. The division of labour was to have two people work on the first section (linear regression) and have the remaining three work on the second section (logistic regression). The finer division will be discussed in more detail later in the personal statements of contribution. 
+
+After the initial meeting and distribution of work, we created a group chat that allowed discussion of ideas and an easy meadium to send files. Similarly, we created a Git repository that contained the code and R-Markdown files which allowed each member to keep up to date with the files easily and manage version control (which did come in handy once or twice). 
+
+Because this group consists of people who had met before and are close friends, it made communicating trivial as there was already a rapport. The group working on the first section met two more times after the initial meeting to discuss plans for section, while the group working on the second section met three more times for a similar purpose. 
+
+Once each section was completed independently, one person was tasked with taking the two section and ensuring the final report flowed appropriately. Then each member was given an opportunity to read over the final report and correct any mistakes or include more detail in places where it was required.
