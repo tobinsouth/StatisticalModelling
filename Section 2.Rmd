@@ -9,7 +9,10 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(GGally)
+library(xtable)
 source('conf_int_prop.R')
+
+options(xtable.comment = FALSE)
 ```
 
 # Part B: Logistic Regression
@@ -296,7 +299,7 @@ AIC(mod.full, mod.step, mod.back)
 
 ### Prediction to verify model
 
-Another way of assessing the goodness of fit of a model it to see how well predicts values. This works especially well for predicting binary outcomes as you can calculate a simple proportion of correct predictions. Firstly we predicted values for the data that was used to fit the model. This gives us an about 79.6% success rate.
+Another way of assessing the goodness of fit of a model it to see how well predicts values. This works especially well for predicting binary outcomes as you can calculate a simple proportion of correct predictions. Firstly we predicted values for the data that was used to fit the model. This gives us an about 81.5% success rate.
 
 ```{r}
 predict <- predict(mod.step, newdata = mammo ,type="response")
@@ -320,14 +323,14 @@ mammo.predict %>%
   round(3)
 ```
 
-The second approach is to fit the model to only half of the data we have available and then attempt to predict the values of the other half of the data. Doing this we get a success rate of about 78.7% which is barely less than above. This is evidence to justify our model as valid and useful for prediction. 
+The second approach is to fit the model to only half of the data we have available and then attempt to predict the values of the other half of the data. Doing this we get a success rate of about 81% which is barely lower than above. This is evidence to justify our model as valid and useful for prediction. 
 
 
 ```{r}
 train <- slice(mammo[complete,], 1:400)
 test <- slice(mammo[complete,], 401:831)
 
-mod.train <- glm(Severity ~ Age + Shape, data = train, family = "binomial")
+mod.train <- glm(Severity ~ Age + Shape + Margin, data = train, family = "binomial")
 
 predict <- predict(mod.train, newdata = test ,type="response")
 predict.df <- data.frame(predict.prob = predict)
@@ -352,19 +355,22 @@ mammo.predict %>%
 
 
 
-Prediction can also be used to inform clinical decisions. To that end we produced a table that gives predictive probabilities for different ages and shapes.
+Prediction can also be used to inform clinical decisions. To that end we produced a table that gives predictive probabilities for different ages, shapes and margins.
 
-```{r}
-pred1 <- predict(mod.step, newdata = data.frame(Age=seq(from=10, to=80, by=10), Shape = "1 and 2"), type = "response")
-pred3 <- predict(mod.step, newdata = data.frame(Age=seq(from=10, to=80, by=10), Shape = "3"), type = "response")
-pred4 <- predict(mod.step, newdata = data.frame(Age=seq(from=10, to=80, by=10), Shape = "4"), type = "response")
+```{r results="asis"}
+for (age in seq(from = 20, to = 80, by = 10)) {
+pred1 <- predict(mod.step, newdata = data.frame(Age = age, Margin = c("1", "2", "3", "4", "5"), Shape = "1 and 2"), type = "response")
+pred3 <- predict(mod.step, newdata = data.frame(Age = age, Margin = c("1", "2", "3", "4", "5"), Shape = "3"), type = "response")
+pred4 <- predict(mod.step, newdata = data.frame(Age = age, Margin = c("1", "2", "3", "4", "5"), Shape = "4"), type = "response")
 
 pred <- cbind(pred1, pred3, pred4)
 
-diag.table <- data.frame(round(pred, 2), row.names = seq(from=10, to=80, by=10))
+diag.table <- data.frame(round(pred, 2), row.names = c("Circumscribed", "Microlobulated", "Obscured", "Ill-Defined", "Spiculated"))
 colnames(diag.table) <- c("Round or Oval", "Lobular", "Irregular")
-diag.table
+tab <- xtable(diag.table, caption = paste('Predictive probabilities for Age =', age))
+print(tab, type="latex")
+}
 ```
 
 
-Above each row represents a different age and each column a different shape.
+These tables represent the probability that a growth is malignant based on Shape and Margin for differnet ages. 
