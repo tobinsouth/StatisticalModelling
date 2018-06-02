@@ -398,3 +398,15 @@ mammo.predict %>%
          correct = (predict == Severity)) %>%
   count(correct) %>%
   summarise(hit.rate = n[2]/(n[1] + n[2]))
+
+
+# Assumption Checking
+## Log odds of dependent varibles vs independent varibles
+
+TO test the assumption of linearlity between the independent varibles and the log odds of Severity
+
+
+odds <- mammo$Severity/(1-mammo$Severity)
+logodds <- log(odds)
+logodds(mammo$Severity)
+boxTidwell(y=mammo$Severity, x = mammo[,2:3] )

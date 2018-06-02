@@ -7,6 +7,13 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+#install.packages(c("GGally","xtable")) #if required
+library(tidyverse)
+library(GGally)
+library(xtable)
+source('conf_int_prop.R')
+
+options(xtable.comment = FALSE)
 knitr::opts_chunk$set(fig.pos = 'H')
 ```
 
@@ -285,7 +292,7 @@ All that has been discussed above highlights that the two simple regression mode
 
 
 
-#Logistic Regression
+# Logistic Regression
 
 Breast cancer was the second most commonly diagnosed cancer in Australia in 2013 [^1]. The most effective method for breast cancer screening is mammography. To confirm the diagnosis, invasive biopsies are performed. However, 70% of biopsies come back benign, indicating a high false positive rate in mammographies. To improve this process several computer-aided diagnosis (CAD) systems have been developed to help aid clinicians in making informed diagnoses.
 
@@ -390,8 +397,6 @@ mammo$BI.RADS <- as.numeric(mammo$BI.RADS)
 summary(mammo$BI.RADS, exclude = FALSE) # 3 NAs
 ```
 
-# Can these varibles be interpolated (no)
-
 ## Data Visualisation
 To examine the relationship between each of the individual variables, a plot of the relationships between the variable is made. 
 ```{r, warning=FALSE}
@@ -487,6 +492,8 @@ ggplot(confidenceInt, aes(x = Density, y = Proportion)) +
   geom_errorbar(aes(ymax = Upper, ymin = Lower))
 ```
 
+
+
 ## Making a Model
 
 ### Using the right data
@@ -570,6 +577,37 @@ AIC(mod.full, mod.step, mod.back)
 ```
 
 
+
+## Assumptions of logistic regression
+
+There are 3 key assumptions to check in a logistic model of the data.
+
+Firstly, logistic regression requies the dependent varible be a binary varible, which is the case in this model.
+
+Secondly, indepence between the obersvations in teh data is required. As each oberservation is a different individual and breast cancer is not contagious, the data can be assumed to be independent.
+
+Thirdly, and finally, an assumption of logistic regression is the linearlity between the log odds of the dependent varibles and the independent varibles. This can be seen to be true below.
+
+### Code that find log odds
+```{r}
+
+# I'm using the above predict data, if this is used in the final approach, this section will need to be moved lower.
+predict <- predict(mod.step, newdata = mammo ,type="response")
+predict.df <- data.frame(predict.prob = predict)
+
+predict.df.indexed <- data.frame(predict.df, id = row.names(predict.df))
+mammo.indexed <- data.frame(mammo, id = row.names(mammo))
+
+mammo.predict <- left_join(mammo.indexed, predict.df.indexed, by="id")
+mammo.predict <- mammo.predict[ , !names(mammo.predict) %in% c("id")]
+
+
+
+print.default("PLEASE DO SOME LOG ODDS OR THIS WILL LOOK VERY OUT OF PLACE")
+plot(mammo.predict$Age, log(mammo.predict$predict.prob/(1-mammo.predict$predict.prob)))
+# Thats cooked
+```
+
 ### Prediction to verify model
 
 Another way of assessing the goodness of fit of a model it to see how well predicts values. This works especially well for predicting binary outcomes as you can calculate a simple proportion of correct predictions. Firstly we predicted values for the data that was used to fit the model. This gives us an about 81.5% success rate.
@@ -651,13 +689,13 @@ These tables represent the probability that a growth is malignant based on Shape
 
 
 
+# Conclusion 
+
+????
 
 
 
-
-
-
-#Teamwork Reflection
+# Teamwork Reflection
 As this project was completed in a team of five people, collaboration and communication were key. The first meeting was undertaken at the university campus where we all met face to face to partition the workload evenly between all members involved. The division of labour was to have two people work on the first section (linear regression) and have the remaining three work on the second section (logistic regression). The finer division will be discussed in more detail later in the personal statements of contribution. 
 
 After the initial meeting and distribution of work, we created a group chat that allowed discussion of ideas and an easy meadium to send files. Similarly, we created a Git repository that contained the code and R-Markdown files which allowed each member to keep up to date with the files easily and manage version control (which did come in handy once or twice). 
