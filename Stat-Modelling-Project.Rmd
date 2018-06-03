@@ -2,7 +2,9 @@
 title: "Statistical Modelling Project"
 author: "Joshua Bean, James Beck, Lily Harris, Miriam Slattery, Tobin South"
 date: "2 June 2018"
-output: pdf_document
+output:
+  word_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -32,9 +34,9 @@ where $y_i$ is the $i$th data point of the response variable, $x_{i1}, \dots, x_
 Multiple linear regression will be performed on data about heart catheters in children. The aim is to be able to predict the length of catheter required for a child with the possible predictor variables of Height and Weight. First, we look at the relationship between predictors and the response variable to confirm that it is a linear relationship and that a linear model is appropriate. Then we will fit three models, one with both predictors and model with each single predictor. We will check the assumptions of linear models for each of these and compare the models. After examining the model subspaces, we will find that Height and Weight are correlated and neither is significant in the full model. Thus, we will select a simple regression model.
 
 
-For logistic regression is used for the case with multiple predictor variables and when the response variable has only two outcomes (usually denoted 0 and 1). We use the log-odds as the response variable in the regression, $\eta_i=\log\frac{\pi_i}{1-\pi_i}$, where $pi_i$ is the probability of the $i$th response being 1. We find the best estimates, $\beta$, such that $\eta=\beta^T X$.
+Logistic regression is used when the response variable has only two outcomes (usually denoted 0 and 1), and can include multiple predictor variables. We use the log-odds as the response variable in the regression, $\eta_i=\log\frac{\pi_i}{1-\pi_i}$, where $pi_i$ is the probability of the $i$th response being 1. We find the best estimates, $\beta$, such that $\eta=\beta^T X$.
 
-We will use logistic regression for modelling the mammograms such that we can predict whether a mass lesion found is malignant or benign to avoid unnecessary biopsies. This will use the measurements found in mammograms as predictors variables: Shape, Margin and Density. First, we will clean the data by making sure variables are appropriately categorised and missing data is taken care of. Then we will use visualisations of the data and confidence intervals to explore the relationship between the variables. Then we can fit the full logistic model. Using setpwise selection with AIC, we will then reduce the model by removing statistically insignificant predictors. Finally, we will verify our model selection using prediction.
+We will use logistic regression for modelling the data collected about mammograms such that we can predict whether a mass lesion found is malignant or benign to avoid unnecessary biopsies. This will use the measurements found in mammograms as predictors variables: Shape, Margin and Density. First, we will clean the data by making sure variables are appropriately categorised and missing data handled and denoted accordingly. Then we will use visualisations of the data and confidence intervals to explore the relationship between the variables. Then we can fit the full logistic model. Using stepwise selection with AIC, we will then reduce the model by removing statistically insignificant predictors. Finally, we will verify our model selection using prediction.
 
 
 
@@ -72,7 +74,7 @@ pairs(subset(catheter, select=c(2:4)))
 
 Before examining these plots closely, note that there are only 12 data points so there will be a lot of unexplained scatter and it is difficult to recognise trends. 
 
-To investigate the relationship between Length, the response variable and the two predictor variables, Heigth and Weight, we need to consider the two plots in the top right of Figure \ref{fig:pairwisescat}. 
+To investigate the relationship between Length, the response variable, and the two predictor variables, Heigth and Weight, we need to consider the two plots in the top right of Figure \ref{fig:pairwisescat}. 
 
 The scatter plot between Length and Weight (top centre plot) shows the relationship is strong, positive and linear. Similarly, the plot between Length and Height (top right) shows the relationship is moderate, positive and mostly linear with slight positive curvature. The trend is only moderate to moderately strong because for the lower values, there is some deviation from the strong trendline. So we can conclude that the relationship between the resonse and the predictor variables is positive linear.
  
@@ -152,7 +154,7 @@ Using Figure \ref{fig:lm2assumps}, we will check the following assumptions,
 \end{itemize}
 \item{\textit{Homoscedasticity}}
 \begin{itemize}
-\item In the residuals vs fitted plot, there is considerable fanning in the points, particularly for the smaller fitted values. Similarly in the scale location plot the data has some curvature present in it further implying a non-constant variance. However due to the small data set, this is insufficient evidence to invalidate the assumption of homoscedasticity. 
+\item In the residuals vs fitted plot, there is considerable fanning in the points, particularly for the smaller fitted values. Similarly in the scale location plot, the data has some curvature present in it further implying a non-constant variance. However due to the small data set, this is insufficient evidence to invalidate the assumption of homoscedasticity. 
 \end{itemize}
 \item{\textit{Normality}}
 \begin{itemize}
@@ -179,7 +181,7 @@ Using Figure \ref{fig:lm3assumps}, we will check the following assumptions,
 \begin{itemize}
 \item{\textit{Linearity}}
 \begin{itemize}
-\item In the residuals vs fitted plot, the data follows a reasonably linear trend with an almost even spread of points above and below the horizontal line. This lack of linearity can be explained by the small data set, hence the data is approximately linear and the assumptions holds.
+\item In the residuals vs fitted plot, the data follows a reasonably linear trend with an almost even spread of points above and below the horizontal line. This lack of linearity can be explained by the small data set, hence the data is approximately linear and the assumption holds.
 \end{itemize}
 \item{\textit{Homoscedasticity}}
 \begin{itemize}
@@ -273,7 +275,7 @@ Since the angle between these two subspaces is not $\frac{\pi}{2} \approx 1.57$,
 ##Final Model Selection
 We can now select a final model to be used in predicting the lengths of catheter required for children. In the multiple regression model, we saw that the coeffficients were statistically insignificant. This was then explained by looking into the angle between the two vector subspaces for Height and Weight, which showed that Height and Weight were moderately correlated. Therefore, it seems unnecessary to fit both Height and Weight as predictors. We will avoid overfitting by using only the one of the predictor variables. 
 
-To select between the two simple regression models, we can use the AIC statistics, which weighs up goodness of fit against the number of predictors. Since the number of predictors is the same between the two models, AIC is just a measure of goodness of fit. The two simple regression models, in terms of Height and Weight have AIC values, $71.19$ and $69.92$ respectively. Although the difference in these two values is very small, it implies that the simple regression model as a function of Weight is a slightly better fit than Height. 
+To select between the two simple regression models, we can use the Akaike Information Criterion, AIC, which weighs up goodness of fit against the number of predictors. Since the number of predictors is the same between the two models, AIC is just a measure of goodness of fit. The two simple regression models, in terms of Height and Weight have AIC values, $71.19$ and $69.92$ respectively. Although the difference in these two values is very small, it implies that the simple regression model as a function of Weight is a slightly better fit than Height. 
 
 Since we want to use the model for prediction, we can comapre the prediction intervals for both models as in figure \ref{fig:PredInts}.
 
@@ -699,21 +701,13 @@ Prediction can also be used to inform clinical decisions. To that end we produce
 
 ```{r results="asis"}
 for (age in seq(from = 20, to = 80, by = 10)) {
-pred1 <- predict(mod.step, newdata = data.frame(Age = age,
-                                                Margin = c("1", "2", "3", "4", "5"),
-                                                Shape = "1 and 2"), type = "response")
-pred3 <- predict(mod.step, newdata = data.frame(Age = age,
-                                                Margin = c("1", "2", "3", "4", "5"),
-                                                Shape = "3"), type = "response")
-pred4 <- predict(mod.step, newdata = data.frame(Age = age,
-                                                Margin = c("1", "2", "3", "4", "5"),
-                                                Shape = "4"), type = "response")
+pred1 <- predict(mod.step, newdata = data.frame(Age = age, Margin = c("1", "2", "3", "4", "5"), Shape = "1 and 2"), type = "response")
+pred3 <- predict(mod.step, newdata = data.frame(Age = age, Margin = c("1", "2", "3", "4", "5"), Shape = "3"), type = "response")
+pred4 <- predict(mod.step, newdata = data.frame(Age = age, Margin = c("1", "2", "3", "4", "5"), Shape = "4"), type = "response")
 
 pred <- cbind(pred1, pred3, pred4)
 
-diag.table <- data.frame(round(pred, 2), row.names = c("Circumscribed", "Microlobulated",
-                                                       "Obscured", "Ill-Defined",
-                                                       "Spiculated"))
+diag.table <- data.frame(round(pred, 2), row.names = c("Circumscribed", "Microlobulated", "Obscured", "Ill-Defined", "Spiculated"))
 colnames(diag.table) <- c("Round or Oval", "Lobular", "Irregular")
 tab <- xtable(diag.table, caption = paste('Predictive probabilities for Age =', age))
 print(tab, type="latex")
@@ -753,7 +747,4 @@ I was tasked with working on Section 1 (linear regression), with Joshua Bean. We
 
 
 ###Joshua Bean
-My contribution to this report was to co-write section 1 with Miriam Slattery, we met together to complete the code. Then I wrote about the model creation and analyses, culminating in the conclusion about the final model chosen. 
-
-###James Beck
-I took part in Section 2 with Tobin South and Lily Harris applying logistic regression to mammographic data. My main contribution was to the pairwise plot and the section on model prediction where I looked at prediction as a method of assessing goodness of fit and also using predictive probabilities as a diagnostic tool for clinicians.
+My contribution to this report was to co-write section 2 with Miriam Slattery, we met together to complete the code. Then I wrote about the model creation and analyses, culminating in the conclusion about the final model chosen. 
