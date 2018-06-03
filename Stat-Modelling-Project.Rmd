@@ -753,4 +753,7 @@ I was tasked with working on Section 1 (linear regression), with Joshua Bean. We
 
 
 ###Joshua Bean
-My contribution to this report was to co-write section 2 with Miriam Slattery, we met together to complete the code. Then I wrote about the model creation and analyses, culminating in the conclusion about the final model chosen. 
+My contribution to this report was to co-write section 1 with Miriam Slattery, we met together to complete the code. Then I wrote about the model creation and analyses, culminating in the conclusion about the final model chosen. 
+
+###James Beck
+I took part in Section 2 with Tobin South and Lily Harris applying logistic regression to mammographic data. My main contribution was to the pairwise plot and the section on model prediction where I looked at prediction as a method of assessing goodness of fit and also using predictive probabilities as a diagnostic tool for clinicians.
