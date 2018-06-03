@@ -7,32 +7,52 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-#install.packages(c("GGally","xtable")) #if required
+knitr::opts_chunk$set(fig.pos = 'H')
 library(tidyverse)
 library(GGally)
 library(xtable)
 source('conf_int_prop.R')
 
 options(xtable.comment = FALSE)
-knitr::opts_chunk$set(fig.pos = 'H')
 ```
-
+\newpage
 \tableofcontents
+\newpage
 
 #Introduction
 This report will explore two different forms of regression, multiple linear regression and logistic regression, through two different data sets. 
 
+Multiple linear regression uses several explanantory (predictor) variables to predict the outcome of a response variable. It attempts to model the relationship between these variables as a linear relationship by using data,
+\begin{equation*}
+y_i=\beta_0 + \beta_1x_{i1} + \beta_2x_{i2} + \cdots + \beta_px_{ip} + \epsilon_i,
+\end{equation*}
+where $y_i$ is the $i$th data point of the response variable, $x_{i1}, \dots, x_{ip}$ are the $i$th points of the $p$ predictor variables, $\beta_0, \dots, beta_p$ are constant coefficients and $\epsilon_i$ is the error in the $i$th prediction. In regression, we find the least squares estimates for $\beta_0, \dots, \beta_p$ so that the error for each prediction is minimised.
+
+
 Multiple linear regression will be performed on data about heart catheters in children. The aim is to be able to predict the length of catheter required for a child with the possible predictor variables of Height and Weight. First, we look at the relationship between predictors and the response variable to confirm that it is a linear relationship and that a linear model is appropriate. Then we will fit three models, one with both predictors and model with each single predictor. We will check the assumptions of linear models for each of these and compare the models. After examining the model subspaces, we will find that Height and Weight are correlated and neither is significant in the full model. Thus, we will select a simple regression model.
 
 
-INTRODUCTION STUFF FOR LOGISTIC MODEL....................................................
+For logistic regression is used for the case with multiple predictor variables and when the response variable has only two outcomes (usually denoted 0 and 1). We use the log-odds as the response variable in the regression, $\eta_i=\log\frac{\pi_i}{1-\pi_i}$, where $pi_i$ is the probability of the $i$th response being 1. We find the best estimates, $\beta$, such that $\eta=\beta^T X$.
+
+We will use logistic regression for modelling the mammograms such that we can predict whether a mass lesion found is malignant or benign to avoid unnecessary biopsies. This will use the measurements found in mammograms as predictors variables: Shape, Margin and Density. First, we will clean the data by making sure variables are appropriately categorised and missing data is taken care of. Then we will use visualisations of the data and confidence intervals to explore the relationship between the variables. Then we can fit the full logistic model. Using setpwise selection with AIC, we will then reduce the model by removing statistically insignificant predictors. Finally, we will verify our model selection using prediction.
 
 
 
 
 
 #Multiple Linear Regression
-Heart cathetisation is sometimes performed on children with congenital heart defects. We want to find if it is possible to predict the required length of catheter. The height, weight and catheter length was recorded for 12 individuals.
+Heart cathetisation is sometimes performed on children with congenital heart defects. We want to find if it is possible to predict the required length of catheter. The height, weight and catheter length was recorded for 12 individuals. The data is summarised below.
+\begin{table}[ht]
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Variable} & \textbf{Description}\\
+\hline
+Height & Heightof child (cm)\\
+Weight & Weight of child (kg)\\
+Length & Length of required heart catheter (cm)\\
+\hline
+\end{tabular}
+\end{table}
 
 ##Data Visualisation
 First, we enter the data into R to allow for analysis.
@@ -292,11 +312,29 @@ All that has been discussed above highlights that the two simple regression mode
 
 
 
-# Logistic Regression
+#Logistic Regression
 
 Breast cancer was the second most commonly diagnosed cancer in Australia in 2013 [^1]. The most effective method for breast cancer screening is mammography. To confirm the diagnosis, invasive biopsies are performed. However, 70% of biopsies come back benign, indicating a high false positive rate in mammographies. To improve this process several computer-aided diagnosis (CAD) systems have been developed to help aid clinicians in making informed diagnoses.
 
-The data in this examination contains 961 mammographic mass lesions with 445 of those lesions being malignant, given by the indicator variable Severity. Additionally for each of these lesions there are three attributes from the Breast Imaging Reporting and Data System (BI-RADS), including the lesion shape (round= 1, oval= 2, lobular= 3, irregular= 4), the margin (circumscribed= 1, microlobulated= 2, obscured= 3, ill-defined= 4, spiculated= 5) and the density (high= 1, iso= 2, low= 3, fat-containing= 4). 
+The data in this examination contains 961 mammographic mass lesions with 445 of those lesions being malignant, given by the indicator variable Severity. Additionally for each of these lesions there are three attributes from the Breast Imaging Reporting and Data System (BI-RADS), including the lesion shape, the margin and the density. The data is summarised below.
+\begin{table}[ht]
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Variable} & \textbf{Description}\\
+\hline
+Severity & Indicator variable for malignant lesion (0=benign, 1=malignant)\\
+Age & Age of patient in years\\
+Shape & 1=round, 2=oval, 3=lobular, 4=irregular\\
+Margin & 1=circumscribed, 2=microlobulated, 3=obscured, 4=ill-defined, 5=spiculated\\
+Density & 1=high, 2=iso, 3=low, 4=fat-containing\\
+\hline
+\end{tabular}
+\end{table}
+
+
+
+The dependent variable (Severity) is binary in this case. 
+We can also assume independence between the observations as each oberservation is a different individual (assumed to not be related) and breast cancer is not contagious. Therefore, we can use logistic regression on this data.
 
 We will attempt to develop a logistic predictive model for mammographic mass severity using the available predictor variables and to obtain predicted probabilities of mass severity that can used by clinicians to make informed diagnoses.
 
@@ -397,6 +435,8 @@ mammo$BI.RADS <- as.numeric(mammo$BI.RADS)
 summary(mammo$BI.RADS, exclude = FALSE) # 3 NAs
 ```
 
+
+
 ## Data Visualisation
 To examine the relationship between each of the individual variables, a plot of the relationships between the variable is made. 
 ```{r, warning=FALSE}
@@ -425,12 +465,7 @@ Finally Severity has a mostly balanced proportion of benign to malignant which i
 
 ### Confidence intervals
 
-We created confidence intervals for further investigation of how the predictor variable and the response variable are interacting. They allow us to predict which variables will be statistically significant in our model.
-
 ``` {r}
-summary(mammo$Age)
-
-hist(mammo$Age)
 mammo$ageGroup <- cut(mammo$Age,
                         breaks = c(0,20,40,60,80),
                         labels = c("20 and Under","21-40","41-60","Over 60"))
@@ -444,21 +479,23 @@ ggplot(confidenceInt, aes(x = AgeGroup, y = Proportion)) +
   geom_errorbar(aes(ymax = Upper, ymin = Lower)) +
   labs(y = "Proportion of Malignant Cases") +
   ggtitle("Confidence Intervals for the Proportion of Malignant Cases per Age Group")
+```
 
-# We are 95% confident the true proportion of people 20 and under with a malignant mass lies between 3% and 14%
+First, we looked at the confidence intervals for age. To do this, we had to group ages, as finding confidence intervals for each value given in age would be impractical and largely unhelpful. Each interval shows where we expect the true proportion of malignant masses for that age group. For example, we can say that we are 95% confident the true proportion of people aged 20 and under with a malignant mass lies between 3% and 14%. From the plot, we can clearly see that, as the age of patients increases, the proportion of cases with malignant masses also increase. This means that in patients over 40, more than half of the lesions are malignant. It is fair to predict that this variable will be influential in the model.
 
-# Shape
-
+```{r}
 mammo$Shape.orig <- mammo$Shape
 
 confidenceInt <- mammo %>% 
   split(.$Shape.orig) %>%
   map_df(~conf_int_prop(.$Severity), .id = "Shape")
 
-ggplot(confidenceInt, aes(x = Shape, y = Proportion)) +
-  geom_point(size = 4) +
-  geom_errorbar(aes(ymax = Upper, ymin = Lower))
+confidenceInt %>% knitr::kable(caption = "Table of the confidence intervals for the proportion of malignant cases per shape of the variable shape")
+```
 
+Our next variable, Shape provided some more challenges. Our first attempt at creating confidence intervals for the shape of the mass showed that the true proportion of cases with malignant lesions with round and oval shaped masses lies roughly between 16% and 22% for both categories. Basic geometry knowledge tells us that these two shapes are very similar, therefore we will combine these categories.
+
+``` {r}
 levels(mammo$Shape)[levels(mammo$Shape)=="1"] <- "1 and 2"
 levels(mammo$Shape)[levels(mammo$Shape)=="2"] <- "1 and 2"
 table(mammo$Shape)
@@ -469,28 +506,42 @@ confidenceInt <- mammo %>%
 
 ggplot(confidenceInt, aes(x = Shape, y = Proportion)) +
   geom_point(size = 4) +
-  geom_errorbar(aes(ymax = Upper, ymin = Lower))
+  geom_errorbar(aes(ymax = Upper, ymin = Lower)) +
+  labs(y = "Proportion of Malignant Cases") +
+  ggtitle("Confidence Intervals for the Proportion of Malignant Cases per Mass Shape")
+```
 
-# Margin
+Now, looking at the confidence intervals above, we can see that more patients with lobular and irregular shaped masses, categories 3 and 4 respectively, had a malignant mass than those with round or ovular masses. As with age, this clear trend seems to indicate that shape may provide useful information when predicting severity of lesions, and therefore will probably be useful in any models we create.
 
+``` {r}
 confidenceInt <- mammo %>% 
   split(.$Margin) %>%
   map_df(~conf_int_prop(.$Severity), .id = "Margin")
 
 ggplot(confidenceInt, aes(x = Margin, y = Proportion)) +
   geom_point(size = 4) +
-  geom_errorbar(aes(ymax = Upper, ymin = Lower))
+  geom_errorbar(aes(ymax = Upper, ymin = Lower)) +
+  labs(y = "Proportion of Malignant Cases") +
+  ggtitle("Confidence Intervals for the Proportion of Malignant Cases per Margin")
+```
 
-# Density
+The confidence intervals for the variable Margin contain more overlap than those for Age and Shape. The large size of the confidence interval for category 2 is a result of the limited number of cases with this margin in our data set. Here we can see the true proportion of malignant cases with margin 2, 3, 4, and 5 fall within a similar range, while the proportion for those with margin 1 falls in a very different range. This makes it harder to predict whether this variable will be useful in a model as 4 of the 5 categories have similar outcomes of Severity. 
 
+``` {r}
 confidenceInt <- mammo %>% 
   split(.$Density) %>%
   map_df(~conf_int_prop(.$Severity), .id = "Density")
 
+confidenceInt %>% knitr::kable(caption = "Table of the confidence intervals for the proportion of malignant cases per category of the variable density")
+
 ggplot(confidenceInt, aes(x = Density, y = Proportion)) +
   geom_point(size = 4) +
-  geom_errorbar(aes(ymax = Upper, ymin = Lower))
+  geom_errorbar(aes(ymax = Upper, ymin = Lower)) +
+  labs(y = "Proportion of Malignant Cases") +
+  ggtitle("Confidence Intervals for the Proportion of Malignant Cases per Density")
 ```
+
+Finally, we created confidence intervals for the variable Density. This contains little useful information. The ranges for the confidence intervals for categories 1 and 4 pretty much span the entire range of possible proportions. This could be because there is no relationship between these densities and malignant cases, or it could be a result of the how few patients had these densities. As a result, we can predict that density probably will not be a useful variable in our model.
 
 
 
@@ -545,6 +596,8 @@ mod.step <- step(mod.full, direction = "both", trace = 0)
 summary(mod.step)
 ```
 
+### Model by removal of non-signficant terms
+
 Here, we will be creating a model by removing the least significant variable. The first iteration was simple as none of the coefficients for Density were significant. We then also removed Margin, as only 2 of the 4 coefficients were statistically significant.
 
 ```{r}
@@ -559,54 +612,30 @@ summary(mod.back)
 
 ## Choosing models
 
-We now have 3 model created, but which to choose? Each smaller model only required the removal of one variable.  First, we wanted to ensure that removing this variable actually had a significant impact on the model. To do this, we essentially checked if we could set the coefficients for that variable equal to 0. this could be found by comparing the difference in residual deviances to the q value (i cant describe this things (qchisq(1-0.05, df = 3))
+Now we have three models to choose from. Each smaller model only required the removal of one variable. First, we wanted to ensure that removing this variable actually had a significant impact on the model. We tested if we could set the coefficients for that variable equal to 0. This could be found by comparing the difference in residual deviances to the 95th percentile of the chi squared distributions. 
 
 ```{r compare}
-summary(mod.full)
-summary(mod.back)
-summary(mod.step)
 qchisq(1-0.05, df = 3)
-mod.back$deviance - mod.full$deviance 
-anova(mod.back, mod.full) # reject hypothesis that all coefficients are equal
+mod.step$deviance - mod.full$deviance 
+anova(mod.step, mod.full) # Accept hypothesis that all coefficients are equal
+```
 
-qchisq(1-0.05, df = 2)
-mod.step$deviance - mod.back$deviance
-anova(mod.step, mod.back) # These literally say the same thing but in the prac we use the difference
+We first compared our two largest models, the stepwise selection model and the full model. The only difference between these models the stepwise model removes the variable Density. As we can see, the difference in residual deviance, approximately 3.405, is well within the 95th percentile, therefore including Density does not significantly alter the residuals of the model. Since it is not providing any useful information, its inclusion only makes the model larger and more inefficient, meaning the stepwise selection model is the better model.
 
+``` {r}
+qchisq(1-0.05, df = 4)
+mod.back$deviance - mod.step$deviance
+anova(mod.back, mod.step) 
+```
+
+Next we compared the stepwise selection model to the backwards selection model, which omits the variables Margin and Density. Here we can see that the 95th percentile value is 9.488, while the difference in residual deviance is 34.539, much higher than the 95th percentile value. Therefore, we reject the null hypothesis which states that the values of the coefficients for the variable Margin could be equal to 0 without significantly impacting the model. As this is not the case, we can see that including Margin in the model changes the model signficantly.
+
+``` {r}
 AIC(mod.full, mod.step, mod.back)
 ```
 
+A final way to compare models is to use the Akaike Information Criterion or AIC. When we compare the AIC values for each model, we can see that the full model and the stepwise model are very close in value, with stepwise just a little lower. While this is not a significant difference, as we have already shown previously, including the extra variable Density in the full model does not significantly influence the results. Thus, the best model for predicting whether a mass is malignant or not is the stepwise model.
 
-
-## Assumptions of logistic regression
-
-There are 3 key assumptions to check in a logistic model of the data.
-
-Firstly, logistic regression requies the dependent varible be a binary varible, which is the case in this model.
-
-Secondly, indepence between the obersvations in teh data is required. As each oberservation is a different individual and breast cancer is not contagious, the data can be assumed to be independent.
-
-Thirdly, and finally, an assumption of logistic regression is the linearlity between the log odds of the dependent varibles and the independent varibles. This can be seen to be true below.
-
-### Code that find log odds
-```{r}
-
-# I'm using the above predict data, if this is used in the final approach, this section will need to be moved lower.
-predict <- predict(mod.step, newdata = mammo ,type="response")
-predict.df <- data.frame(predict.prob = predict)
-
-predict.df.indexed <- data.frame(predict.df, id = row.names(predict.df))
-mammo.indexed <- data.frame(mammo, id = row.names(mammo))
-
-mammo.predict <- left_join(mammo.indexed, predict.df.indexed, by="id")
-mammo.predict <- mammo.predict[ , !names(mammo.predict) %in% c("id")]
-
-
-
-print.default("PLEASE DO SOME LOG ODDS OR THIS WILL LOOK VERY OUT OF PLACE")
-plot(mammo.predict$Age, log(mammo.predict$predict.prob/(1-mammo.predict$predict.prob)))
-# Thats cooked
-```
 
 ### Prediction to verify model
 
@@ -670,20 +699,13 @@ Prediction can also be used to inform clinical decisions. To that end we produce
 
 ```{r results="asis"}
 for (age in seq(from = 20, to = 80, by = 10)) {
-pred1 <- predict(mod.step, newdata = data.frame(Age = age,
-                                                Margin = c("1", "2", "3", "4", "5"),
-                                                Shape = "1 and 2"), type = "response")
-pred3 <- predict(mod.step, newdata = data.frame(Age = age,
-                                                Margin = c("1", "2", "3", "4", "5"),
-                                                Shape = "3"), type = "response")
-pred4 <- predict(mod.step, newdata = data.frame(Age = age,
-                                                Margin = c("1", "2", "3", "4", "5"),
-                                                Shape = "4"), type = "response")
+pred1 <- predict(mod.step, newdata = data.frame(Age = age, Margin = c("1", "2", "3", "4", "5"), Shape = "1 and 2"), type = "response")
+pred3 <- predict(mod.step, newdata = data.frame(Age = age, Margin = c("1", "2", "3", "4", "5"), Shape = "3"), type = "response")
+pred4 <- predict(mod.step, newdata = data.frame(Age = age, Margin = c("1", "2", "3", "4", "5"), Shape = "4"), type = "response")
 
 pred <- cbind(pred1, pred3, pred4)
 
-diag.table <- data.frame(round(pred, 2), row.names = c("Circumscribed", "Microlobulated",
-                                                       "Obscured", "Ill-Defined", "Spiculated"))
+diag.table <- data.frame(round(pred, 2), row.names = c("Circumscribed", "Microlobulated", "Obscured", "Ill-Defined", "Spiculated"))
 colnames(diag.table) <- c("Round or Oval", "Lobular", "Irregular")
 tab <- xtable(diag.table, caption = paste('Predictive probabilities for Age =', age))
 print(tab, type="latex")
@@ -691,22 +713,36 @@ print(tab, type="latex")
 ```
 
 
-These tables represent the probability that a growth is malignant based on Shape and Margin for differnet ages. 
+These tables represent the probability that a growth is malignant based on Shape and Margin for different ages. 
 
 
 
 
-# Conclusion 
-
-????
 
 
 
-# Teamwork Reflection
-As this project was completed in a team of five people, collaboration and communication were key. The first meeting was undertaken at the university campus where we all met face to face to partition the workload evenly between all members involved. The division of labour was to have two people work on the first section (linear regression) and have the remaining three work on the second section (logistic regression). The finer division will be discussed in more detail later in the personal statements of contribution. 
 
-After the initial meeting and distribution of work, we created a group chat that allowed discussion of ideas and an easy meadium to send files. Similarly, we created a Git repository that contained the code and R-Markdown files which allowed each member to keep up to date with the files easily and manage version control (which did come in handy once or twice). 
+
+
+#Teamwork Reflection
+As this project was completed in a team of five people, collaboration and communication were key. The first meeting was undertaken at the university campus where we all met face to face to partition the workload evenly between all members. The division of labour was to have two people work on the first section (linear regression) and have the remaining three work on the second section (logistic regression). The finer division will be discussed in more detail later in the personal statements of contribution. 
+
+After the initial meeting and distribution of work, we created a group chat that allowed discussion of ideas and an easy medium to send files. Similarly, we created a Git repository that contained the code and R-Markdown files which allowed each member to keep up to date with the files easily and manage version control (which did come in handy once or twice). 
 
 Because this group consists of people who had met before and are close friends, it made communicating trivial as there was already a rapport. The group working on the first section met two more times after the initial meeting to discuss plans for section, while the group working on the second section met three more times for a similar purpose. 
 
 Once each section was completed independently, one person was tasked with taking the two section and ensuring the final report flowed appropriately. Then each member was given an opportunity to read over the final report and correct any mistakes or include more detail in places where it was required.
+
+We held our initial meeting towards the end of Week 10, where we delegated groups to Sections. We agreed to complete both sections by Wednesday Week 12. Then the two sections were combined and edited by the whole group by Friday Week 12. We then used final weekend before the submission date to do final editing.
+
+
+
+
+
+##Contribution of Group Members
+###Miriam Slattery
+I was tasked with working on Section 1 (linear regression), with Joshua Bean. We met to analyse the data and develop the code for this section together. In particular, I wrote about the model assumptions. I also wrote the Introduction and combined the two sections into a cohesive report.
+
+
+###Joshua Bean
+My contribution to this report was to co-write section 2 with Miriam Slattery, we met together to complete the code. Then I wrote about the model creation and analyses, culminating in the conclusion about the final model chosen. 
