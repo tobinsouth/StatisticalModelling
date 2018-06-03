@@ -699,13 +699,21 @@ Prediction can also be used to inform clinical decisions. To that end we produce
 
 ```{r results="asis"}
 for (age in seq(from = 20, to = 80, by = 10)) {
-pred1 <- predict(mod.step, newdata = data.frame(Age = age, Margin = c("1", "2", "3", "4", "5"), Shape = "1 and 2"), type = "response")
-pred3 <- predict(mod.step, newdata = data.frame(Age = age, Margin = c("1", "2", "3", "4", "5"), Shape = "3"), type = "response")
-pred4 <- predict(mod.step, newdata = data.frame(Age = age, Margin = c("1", "2", "3", "4", "5"), Shape = "4"), type = "response")
+pred1 <- predict(mod.step, newdata = data.frame(Age = age,
+                                                Margin = c("1", "2", "3", "4", "5"),
+                                                Shape = "1 and 2"), type = "response")
+pred3 <- predict(mod.step, newdata = data.frame(Age = age,
+                                                Margin = c("1", "2", "3", "4", "5"),
+                                                Shape = "3"), type = "response")
+pred4 <- predict(mod.step, newdata = data.frame(Age = age,
+                                                Margin = c("1", "2", "3", "4", "5"),
+                                                Shape = "4"), type = "response")
 
 pred <- cbind(pred1, pred3, pred4)
 
-diag.table <- data.frame(round(pred, 2), row.names = c("Circumscribed", "Microlobulated", "Obscured", "Ill-Defined", "Spiculated"))
+diag.table <- data.frame(round(pred, 2), row.names = c("Circumscribed", "Microlobulated",
+                                                       "Obscured", "Ill-Defined",
+                                                       "Spiculated"))
 colnames(diag.table) <- c("Round or Oval", "Lobular", "Irregular")
 tab <- xtable(diag.table, caption = paste('Predictive probabilities for Age =', age))
 print(tab, type="latex")
