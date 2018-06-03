@@ -3,7 +3,6 @@ title: "Statistical Modelling Project"
 author: "Joshua Bean, James Beck, Lily Harris, Miriam Slattery, Tobin South"
 date: "2 June 2018"
 output:
-  word_document: default
   pdf_document: default
 ---
 
@@ -21,10 +20,10 @@ options(xtable.comment = FALSE)
 \tableofcontents
 \newpage
 
-#Introduction
+# Introduction
 This report will explore two different forms of regression, multiple linear regression and logistic regression, through two different data sets. 
 
-Multiple linear regression uses several explanantory (predictor) variables to predict the outcome of a response variable. It attempts to model the relationship between these variables as a linear relationship by using data,
+Multiple linear regression uses several explanatory (predictor) variables to predict the outcome of a response variable. It attempts to model the relationship between these variables as a linear relationship by using data,
 \begin{equation*}
 y_i=\beta_0 + \beta_1x_{i1} + \beta_2x_{i2} + \cdots + \beta_px_{ip} + \epsilon_i,
 \end{equation*}
@@ -42,7 +41,7 @@ We will use logistic regression for modelling the data collected about mammogram
 
 
 
-#Multiple Linear Regression
+# Multiple Linear Regression
 Heart cathetisation is sometimes performed on children with congenital heart defects. We want to find if it is possible to predict the required length of catheter. The height, weight and catheter length was recorded for 12 individuals. The data is summarised below.
 \begin{table}[ht]
 \begin{tabular}{|c|c|}
@@ -56,7 +55,7 @@ Length & Length of required heart catheter (cm)\\
 \end{tabular}
 \end{table}
 
-##Data Visualisation
+## Data Visualisation
 First, we enter the data into R to allow for analysis.
 
 ```{r}
@@ -81,7 +80,7 @@ The scatter plot between Length and Weight (top centre plot) shows the relations
 Now consider the relationship between the predictor variables, to look for correlation. To do so, consider the plot of Height against Weight (centre right plot), which shows the relationship is moderately strong, positive and mostly linear with slight positive curvature, and with a few outlying points below the curve. Although there is a small number of data points, we can see that the trend is predominantly linear.
 
 
-##Fitting Models
+## Fitting Models
 Since the data is linear with respect to all variables, we will fit linear models to the data. As there are only two predictor variables, we can perform an exhaustive check for all three different models. These models are as follows,
  
 \begin{eqnarray*}
@@ -99,7 +98,7 @@ lm3<-lm(Length~Weight, data=catheter)
 ```
  
  
-##Assumption Checking
+## Assumption Checking
 For linear models of this form there are four assumptions to check, for each model, these assumptions are: linearity, homoscedasticity, normality and independence. Note that for multiple linear regression, we need to check for linearity and homoscedasticity between the residuals and the overall fitted data as well as between residuals and each predictor variable. For simple linear regression, the residuals vs fitted plot is simply the residuals against the one predictor variable.
  
 Now we will check the assumptions for the first model, $\text{Length} = \beta_0 + \beta_1\text{Height} + \beta_2\text{Weight}$, using the following diagnostic plots,
@@ -200,7 +199,7 @@ Using Figure \ref{fig:lm3assumps}, we will check the following assumptions,
 It should be noted that there is one point in this model that has significant leverage, however once again due to the small number of data points, one outlier has a much bigger affect than for larger data sets. Interestingly, this one point in both models corresponds to the same child, a 3.86kg baby.
 
 
-##Comparing Models
+## Comparing Models
 Now we can compare the coefficients of the predictor variables in the different linear models. Below are summaries of the three linear models.
 
 ```{r}
@@ -215,7 +214,7 @@ When we include Weight in the multiple regression model, it has coefficient, $\b
  
 Now for both simple regression models, the coefficients of Height and Weight (independently) are statistically significant and should be included in the model. However, for the multiple regression model, both coefficients are statistically insignificant implying a strong correlation between these two predictors. In performing model selection, we would choose to drop one of the non-significant predictor variables in the multiple regression model and simplify it to one of the single regression models. 
  
-##Interpreting Coefficients
+## Interpreting Coefficients
 As an example of coefficient interpretation, consider the coefficient of Weight in the two models that use it as a predictor.
 
 For the simple regression model containing Weight, we can interpret the coefficient to mean that for any child, an increase in Weight by one (in kilograms) will result in an increase in length of the catheter tube by 0.611cm. 
@@ -223,7 +222,7 @@ For the simple regression model containing Weight, we can interpret the coeffici
 Similarly, for the multiple regression model the coefficient of Weight can be interpreted as, for an increase in one (kilogram) of Weight for a child of fixed Height, the length of the catheter tube will increase by 0.421cm.
 
 
-##Model as a Projection of Data on Subspaces 
+## Model as a Projection of Data on Subspaces 
 Up until now, we have considered the multiple linear regression as a linear function of the data, but it can also be thought of as projecting the data onto model subspaces. Let $\mathcal{L}_1$ be the model subspace corresponding to the simple linear regression with Height and $\mathcal{L}_2$ be the model subspace corresponding to the simple lienar regression with Weight. 
  
 $\mathcal{L}_1$ is the column space of the model matrix corresponding to the simple regression model with Height. Thus,
@@ -272,7 +271,7 @@ Since these two subspaces are one-dimensional, we can calculate the angle betwee
  
 Since the angle between these two subspaces is not $\frac{\pi}{2} \approx 1.57$, they are not perpendicular, and so the two predictor variables are correlated. This reuslt is not surprising since taller children are generally heavier and vice versa. This could also be observed in the postive linear relationship observed in the Height vs. Weight scatterplot when considering relationships between variables.
 
-##Final Model Selection
+## Final Model Selection
 We can now select a final model to be used in predicting the lengths of catheter required for children. In the multiple regression model, we saw that the coeffficients were statistically insignificant. This was then explained by looking into the angle between the two vector subspaces for Height and Weight, which showed that Height and Weight were moderately correlated. Therefore, it seems unnecessary to fit both Height and Weight as predictors. We will avoid overfitting by using only the one of the predictor variables. 
 
 To select between the two simple regression models, we can use the Akaike Information Criterion, AIC, which weighs up goodness of fit against the number of predictors. Since the number of predictors is the same between the two models, AIC is just a measure of goodness of fit. The two simple regression models, in terms of Height and Weight have AIC values, $71.19$ and $69.92$ respectively. Although the difference in these two values is very small, it implies that the simple regression model as a function of Weight is a slightly better fit than Height. 
@@ -314,7 +313,7 @@ All that has been discussed above highlights that the two simple regression mode
 
 
 
-#Logistic Regression
+# Logistic Regression
 
 Breast cancer was the second most commonly diagnosed cancer in Australia in 2013 [^1]. The most effective method for breast cancer screening is mammography. To confirm the diagnosis, invasive biopsies are performed. However, 70% of biopsies come back benign, indicating a high false positive rate in mammographies. To improve this process several computer-aided diagnosis (CAD) systems have been developed to help aid clinicians in making informed diagnoses.
 
@@ -726,7 +725,7 @@ These tables represent the probability that a growth is malignant based on Shape
 
 
 
-#Teamwork Reflection
+# Teamwork Reflection
 As this project was completed in a team of five people, collaboration and communication were key. The first meeting was undertaken at the university campus where we all met face to face to partition the workload evenly between all members. The division of labour was to have two people work on the first section (linear regression) and have the remaining three work on the second section (logistic regression). The finer division will be discussed in more detail later in the personal statements of contribution. 
 
 After the initial meeting and distribution of work, we created a group chat that allowed discussion of ideas and an easy medium to send files. Similarly, we created a Git repository that contained the code and R-Markdown files which allowed each member to keep up to date with the files easily and manage version control (which did come in handy once or twice). 
@@ -741,10 +740,17 @@ We held our initial meeting towards the end of Week 10, where we delegated group
 
 
 
-##Contribution of Group Members
-###Miriam Slattery
+## Contribution of Group Members
+### Miriam Slattery
 I was tasked with working on Section 1 (linear regression), with Joshua Bean. We met to analyse the data and develop the code for this section together. In particular, I wrote about the model assumptions. I also wrote the Introduction and combined the two sections into a cohesive report.
 
 
-###Joshua Bean
+### Joshua Bean
 My contribution to this report was to co-write section 2 with Miriam Slattery, we met together to complete the code. Then I wrote about the model creation and analyses, culminating in the conclusion about the final model chosen. 
+
+### Tobin South
+I worked with both Lily and James on Section 2. We had an initial meeting to plan section 2 and divide up the work. We also had an additional meeting to clarify some details later in the project as well as spending time casually working on the project with my teammate. I contributed mainly to the data cleaning and data visualization sections of the logistic model and acted as the GitHub technical support for the team. 
+
+
+
+
